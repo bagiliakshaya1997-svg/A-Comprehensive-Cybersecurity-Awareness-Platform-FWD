@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>CyberShield</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#04080f;--bg2:#080f1a;--bg3:#0c1525;--c:#00e5ff;--g:#00ff9d;--r:#ff2d55;--o:#ff6b00;--y:#ffd60a;--p:#9b59ff;--t:#c8dff0;--t2:#7a9ab8;--br:rgba(0,229,255,.12);--sb:248px}
+body{background:var(--bg);color:var(--t);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;background:linear-gradient(rgba(0,229,255,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.015) 1px,transparent 1px);background-size:60px 60px;z-index:0}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--c)}
+
+/* LAYOUT */
+#pg-login{display:none;min-height:100vh;align-items:center;justify-content:center;padding:24px;position:relative;z-index:1}
+#pg-login.on{display:flex}
+#shell{display:none}
+#shell.on{display:flex}
+#main{margin-right:var(--sb);padding:24px 32px 48px;min-height:100vh;position:relative;z-index:1}
+
+/* SIDEBAR */
+#sb{width:var(--sb);background:rgba(4,8,15,.97);border-left:1px solid rgba(0,229,255,.2);position:fixed;top:0;right:0;bottom:0;display:flex;flex-direction:column;z-index:100}
+.sb-logo{padding:20px 16px;border-bottom:1px solid var(--br);text-align:center}
+.sb-ico{width:52px;height:52px;border-radius:50%;border:2px solid var(--c);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:1.5rem;box-shadow:0 0 20px rgba(0,229,255,.3);animation:glow 3s infinite}
+@keyframes glow{0%,100%{box-shadow:0 0 15px rgba(0,229,255,.3)}50%{box-shadow:0 0 30px rgba(0,229,255,.6)}}
+.sb-logo h2{font-family:'Orbitron',monospace;font-size:.72rem;color:var(--c);letter-spacing:2px}
+.sb-logo p{font-family:'Share Tech Mono',monospace;font-size:.5rem;color:var(--t2);letter-spacing:2px}
+.sb-nav{flex:1;padding:12px 0;display:flex;flex-direction:column;gap:1px}
+.sbn{display:flex;align-items:center;gap:10px;padding:12px 16px;background:none;border:none;border-right:3px solid transparent;color:var(--t2);font-family:'Rajdhani',sans-serif;font-size:.83rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .2s;width:100%;text-align:left}
+.sbn:hover{background:rgba(0,229,255,.06);color:var(--c)}
+.sbn.on{background:rgba(0,229,255,.1);color:var(--c);border-right-color:var(--c)}
+.sb-foot{padding:12px 14px;border-top:1px solid var(--br);font-family:'Share Tech Mono',monospace;font-size:.56rem;color:var(--t2);text-align:center}
+.sb-foot span{color:var(--c);display:block;font-size:.63rem;margin-bottom:4px}
+
+/* LOGOUT */
+#logout{position:fixed;top:14px;left:18px;z-index:200;display:none;align-items:center;gap:6px;background:rgba(255,45,85,.08);border:1px solid rgba(255,45,85,.4);color:var(--r);font-family:'Share Tech Mono',monospace;font-size:.62rem;letter-spacing:2px;padding:7px 14px;cursor:pointer;transition:all .2s}
+#logout.on{display:flex}
+#logout:hover{background:rgba(255,45,85,.18)}
+
+/* AUTH */
+.aw{width:100%;max-width:440px;position:relative;z-index:5}
+.a-hd{text-align:center;margin-bottom:22px}
+.a-ico{width:76px;height:76px;border-radius:50%;border:2px solid var(--c);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:2.1rem;animation:glow 3s infinite;position:relative}
+.a-ico::after{content:'';position:absolute;inset:-9px;border-radius:50%;border:1px dashed rgba(0,229,255,.2);animation:spin 20s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.a-ttl{font-family:'Orbitron',monospace;font-size:1.65rem;font-weight:900;color:var(--c);letter-spacing:2px}
+.a-sub{font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:3px;color:var(--t2);margin-top:4px}
+.tabs{display:flex}
+.tab{flex:1;padding:11px;font-family:'Share Tech Mono',monospace;font-size:.65rem;letter-spacing:2px;background:transparent;border:1px solid var(--br);color:var(--t2);cursor:pointer;transition:all .2s;text-transform:uppercase}
+.tab.on{background:var(--c);color:#000;font-weight:700;border-color:var(--c)}
+.ab{background:rgba(8,15,26,.96);border:1px solid var(--br);border-top:none;padding:22px}
+.pan{display:none}.pan.on{display:block}
+.info{background:rgba(0,229,255,.04);border-left:3px solid var(--c);padding:10px 14px;font-family:'Share Tech Mono',monospace;font-size:.65rem;line-height:1.9;color:var(--t2);margin-bottom:16px}
+.info strong{color:var(--c)}
+.fld{margin-bottom:13px}
+.fld label{display:block;font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:2px;color:var(--c);margin-bottom:6px;text-transform:uppercase}
+.fld input{width:100%;background:rgba(4,8,15,.8);border:1px solid var(--br);color:var(--t);padding:11px 13px;font-family:'Rajdhani',sans-serif;font-size:.97rem;outline:none;transition:border-color .2s}
+.fld input:focus{border-color:var(--c)}
+.fld input::placeholder{color:rgba(120,155,185,.4)}
+.pw-bg{height:3px;background:var(--bg3);margin-top:5px}.pw-fill{height:100%;width:0;transition:width .3s,background .3s}
+.pw-lbl{font-family:'Share Tech Mono',monospace;font-size:.57rem;color:var(--t2);margin-top:3px}
+.err,.ok{padding:9px 12px;font-family:'Share Tech Mono',monospace;font-size:.65rem;border:1px solid;display:none;margin-bottom:11px}
+.err{color:var(--r);border-color:rgba(255,45,85,.3);background:rgba(255,45,85,.05)}
+.ok{color:var(--g);border-color:rgba(0,255,157,.3);background:rgba(0,255,157,.05)}
+.err.on,.ok.on{display:block}
+.sbtn{width:100%;background:var(--c);color:#000;border:none;padding:12px;font-family:'Orbitron',monospace;font-size:.74rem;font-weight:700;letter-spacing:2px;cursor:pointer;transition:all .2s;margin-top:3px}
+.sbtn:hover{background:#fff}
+.sw{text-align:center;margin-top:11px;font-size:.88rem;color:var(--t2)}
+.sw a{color:var(--c);cursor:pointer;text-decoration:underline}
+
+/* PAGE HEADER */
+.ph{padding:22px 0 28px;position:relative}
+.ph::after{content:'';position:absolute;bottom:0;left:0;width:70px;height:2px;background:linear-gradient(90deg,var(--c),transparent)}
+.plbl{font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:4px;color:var(--c);display:block;margin-bottom:7px}
+.pttl{font-family:'Orbitron',monospace;font-size:clamp(1.4rem,2.6vw,2.2rem);font-weight:700;color:#fff}
+.pttl em{font-style:normal;color:var(--c)}
+.psub{color:var(--t2);font-size:.93rem;line-height:1.72;margin-top:8px;max-width:650px}
+
+/* COMPONENTS */
+.sec{font-family:'Orbitron',monospace;font-size:1rem;font-weight:700;color:#fff;margin:22px 0 14px;display:flex;align-items:center;gap:10px}
+.sec::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(0,229,255,.22),transparent)}
+.card{background:var(--bg2);border:1px solid var(--br);padding:20px}
+.badge{display:inline-flex;align-items:center;font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:2px;padding:3px 8px;border:1px solid}
+.br_{color:var(--r);border-color:rgba(255,45,85,.4);background:rgba(255,45,85,.06)}
+.bo_{color:var(--o);border-color:rgba(255,107,0,.4);background:rgba(255,107,0,.06)}
+.by_{color:var(--y);border-color:rgba(255,214,10,.4);background:rgba(255,214,10,.06)}
+.bc_{color:var(--c);border-color:rgba(0,229,255,.4);background:rgba(0,229,255,.06)}
+.bg_{color:var(--g);border-color:rgba(0,255,157,.4);background:rgba(0,255,157,.06)}
+.btn-p{display:inline-flex;align-items:center;gap:7px;background:var(--c);color:#000;border:none;padding:11px 22px;font-family:'Orbitron',monospace;font-size:.68rem;font-weight:700;letter-spacing:2px;cursor:pointer;transition:all .2s}
+.btn-p:hover{box-shadow:0 0 22px rgba(0,229,255,.5);transform:translateY(-2px)}
+.btn-o{display:inline-flex;align-items:center;gap:7px;background:transparent;color:var(--c);border:1px solid rgba(0,229,255,.3);padding:11px 22px;font-family:'Orbitron',monospace;font-size:.68rem;letter-spacing:2px;cursor:pointer;transition:all .2s}
+.btn-o:hover{background:rgba(0,229,255,.07)}
+.ldot{width:7px;height:7px;border-radius:50%;background:var(--r);display:inline-block;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .5s,transform .5s}
+.reveal.in{opacity:1;transform:none}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.gauto{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+
+/* STAT CARDS */
+.sc{background:var(--bg2);border:1px solid var(--br);padding:18px;text-align:center}
+.sc::after{content:'';display:block;height:2px;background:linear-gradient(90deg,transparent,var(--sc,var(--c)),transparent);margin-top:12px}
+.sc .n{font-family:'Orbitron',monospace;font-size:2rem;font-weight:900;color:var(--sc,var(--c));display:block;line-height:1;margin-bottom:5px}
+.sc .l{font-size:.68rem;letter-spacing:2px;color:var(--t2);text-transform:uppercase}
+
+/* TICKER */
+.ticker{background:rgba(255,45,85,.06);border:1px solid rgba(255,45,85,.2);border-left:3px solid var(--r);overflow:hidden;display:flex;align-items:center;margin-bottom:20px}
+.tlbl{font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:2px;color:var(--r);padding:9px 12px;flex-shrink:0;display:flex;align-items:center;gap:5px;border-right:1px solid rgba(255,45,85,.2)}
+.ttrack{display:flex;white-space:nowrap;animation:tick 26s linear infinite;padding:9px 0}
+.titem{font-family:'Share Tech Mono',monospace;font-size:.66rem;padding:0 2rem;color:var(--t2)}
+.titem::before{content:'◆ ';color:var(--r);font-size:.5rem}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* LIVE FEED */
+.lp{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.lbox{background:var(--bg2);border:1px solid var(--br);padding:18px}
+.lhd{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.lhdt{font-family:'Share Tech Mono',monospace;font-size:.65rem;letter-spacing:3px;color:var(--c);display:flex;align-items:center;gap:7px}
+.fi{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--br);animation:fdin .4s ease}
+.fi:last-child{border-bottom:none}
+@keyframes fdin{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+.fd{width:7px;height:7px;border-radius:50%;flex-shrink:0;animation:blink 2s infinite}
+.fr{background:var(--r)}.fo{background:var(--o)}.fy{background:var(--y)}.fg{background:var(--g)}
+.ft{font-family:'Share Tech Mono',monospace;font-size:.64rem;color:var(--t2);flex:1;line-height:1.4}
+.ftm{font-family:'Share Tech Mono',monospace;font-size:.56rem;color:rgba(120,155,185,.4);flex-shrink:0}
+.mr{margin-bottom:12px}
+.ml{display:flex;justify-content:space-between;margin-bottom:5px}
+.mn{font-family:'Share Tech Mono',monospace;font-size:.63rem;color:var(--t2)}
+.mp{font-family:'Orbitron',monospace;font-size:.78rem;font-weight:700}
+.mb{height:5px;background:var(--bg3);overflow:hidden}
+.mf{height:100%;width:0;transition:width 1.4s cubic-bezier(.4,0,.2,1);background:linear-gradient(90deg,var(--m1),var(--m2))}
+
+/* THREAT CARDS */
+.htc{background:var(--bg2);border:1px solid var(--br);padding:18px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.htc::before{content:'';position:absolute;top:0;left:0;width:3px;height:0;background:var(--htc,var(--c));transition:height .3s}
+.htc:hover::before{height:100%}
+.htc:hover{background:var(--bg3)}
+.htc .hic{font-size:1.8rem;margin-bottom:9px;display:block}
+.htc .hnm{font-family:'Orbitron',monospace;font-size:.8rem;font-weight:700;color:#fff;margin-bottom:5px}
+.htc .hds{font-size:.84rem;color:var(--t2);line-height:1.6;margin-bottom:9px}
+
+/* THREATS LIB */
+.td{background:var(--bg2);border:1px solid var(--br);margin-bottom:12px;overflow:hidden}
+.tdhd{padding:18px 22px;display:flex;align-items:center;gap:13px;cursor:pointer;transition:background .2s}
+.tdhd:hover{background:rgba(0,229,255,.04)}
+.tdic{font-size:1.8rem;flex-shrink:0}
+.tdm{flex:1}
+.tdnm{font-family:'Orbitron',monospace;font-size:.88rem;font-weight:700;color:#fff;margin-bottom:2px}
+.tdsh{font-size:.84rem;color:var(--t2)}
+.tdar{color:var(--t2);transition:transform .3s}
+.tdar.on{transform:rotate(90deg)}
+.tdb{display:none;padding:18px 22px;border-top:1px solid var(--br)}
+.tdb.on{display:block}
+.tdi{font-size:.9rem;color:var(--t2);line-height:1.78;margin-bottom:14px}
+.tds{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.tds .ts{background:var(--bg3);border:1px solid var(--br);padding:10px 14px;flex:1;min-width:110px}
+.tds .tv{font-family:'Orbitron',monospace;font-size:1rem;font-weight:700;display:block;margin-bottom:2px}
+.tds .tl{font-family:'Share Tech Mono',monospace;font-size:.56rem;color:var(--t2)}
+.tdcols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.tdcol h4{font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:3px;color:var(--c);margin-bottom:8px}
+.tli{list-style:none;display:flex;flex-direction:column;gap:1px}
+.tli li{font-size:.84rem;color:var(--t2);padding:6px 0;border-bottom:1px solid var(--br);display:flex;gap:7px;line-height:1.45}
+.tli li:last-child{border-bottom:none}
+.tli li::before{content:'▸';color:var(--c);font-size:.6rem;margin-top:2px;flex-shrink:0}
+.cs{background:var(--bg3);border:1px solid var(--br);border-left:3px solid var(--r);padding:14px}
+.cstag{font-family:'Share Tech Mono',monospace;font-size:.56rem;letter-spacing:3px;color:var(--r);margin-bottom:6px;display:block}
+.cs h4{font-family:'Orbitron',monospace;font-size:.78rem;color:#fff;margin-bottom:6px}
+.cs p{font-size:.84rem;color:var(--t2);line-height:1.62}
+.csdmg{display:inline-flex;align-items:center;gap:5px;margin-top:8px;font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--r)}
+
+/* AWARENESS */
+.awhero{background:linear-gradient(135deg,rgba(0,229,255,.04),rgba(0,255,157,.03));border:1px solid var(--br);padding:24px;margin-bottom:20px;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center}
+.sring{width:100px;height:100px;border-radius:50%;border:3px solid var(--g);display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,255,157,.05);box-shadow:0 0 18px rgba(0,255,157,.2)}
+.srn{font-family:'Orbitron',monospace;font-size:2rem;font-weight:900;color:var(--g);line-height:1}
+.srl{font-family:'Share Tech Mono',monospace;font-size:.53rem;color:var(--t2)}
+.acc{background:var(--bg2);border:1px solid var(--br);margin-bottom:2px}
+.acchd{padding:15px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background .2s}
+.acchd:hover{background:rgba(0,229,255,.04)}
+.accttl{font-family:'Orbitron',monospace;font-size:.8rem;font-weight:600;color:#fff;flex:1}
+.accarr{color:var(--t2);font-size:.75rem;transition:transform .3s}
+.acchd.on .accarr{transform:rotate(90deg)}
+.accbd{display:none;padding:0 18px 18px}
+.accbd.on{display:block}
+.dd{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.doc,.dnc{background:var(--bg3);border:1px solid var(--br);padding:13px}
+.doc{border-top:2px solid var(--g)}.dnc{border-top:2px solid var(--r)}
+.ddt{font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:3px;margin-bottom:8px}
+.doc .ddt{color:var(--g)}.dnc .ddt{color:var(--r)}
+.ddl{list-style:none;display:flex;flex-direction:column;gap:6px}
+.ddl li{font-size:.84rem;color:var(--t2);display:flex;gap:7px;line-height:1.45}
+.doc .ddl li::before{content:'✓';color:var(--g);flex-shrink:0}
+.dnc .ddl li::before{content:'✗';color:var(--r);flex-shrink:0}
+
+/* QUIZ */
+.qloby{text-align:center;max-width:560px;margin:0 auto;padding:30px 0}
+.qlbic{font-size:4.5rem;display:block;margin-bottom:12px;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.qloby h2{font-family:'Orbitron',monospace;font-size:1.7rem;color:#fff;margin-bottom:10px}
+.qloby p{color:var(--t2);font-size:.92rem;line-height:1.75;margin-bottom:22px}
+.qinfo{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:22px}
+.qib{background:var(--bg2);border:1px solid var(--br);padding:12px 18px;text-align:center}
+.qib .v{font-family:'Orbitron',monospace;font-size:1.2rem;color:var(--c);display:block}
+.qib .k{font-family:'Share Tech Mono',monospace;font-size:.56rem;color:var(--t2)}
+.qsec{display:none}.qsec.on{display:block}
+.qgame{max-width:700px;margin:0 auto}
+.qpbar{height:4px;background:var(--bg3);margin-bottom:22px;overflow:hidden}
+.qpfill{height:100%;background:linear-gradient(90deg,var(--c),var(--g));transition:width .4s}
+.qtopbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:6px}
+.qtopbar .qn{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--t2)}
+.qtopbar .qs{font-family:'Orbitron',monospace;font-size:.85rem;color:var(--c)}
+.qtopbar .qt{font-family:'Share Tech Mono',monospace;font-size:.85rem;color:var(--y)}
+.qtopbar .qt.red{color:var(--r);animation:blink .5s infinite}
+.qcard{background:var(--bg2);border:1px solid var(--br);padding:24px;position:relative}
+.qcard::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--c),var(--p),var(--g),transparent)}
+.qcat{font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:3px;color:var(--c);display:block;margin-bottom:10px}
+.qq{font-family:'Orbitron',monospace;font-size:.9rem;font-weight:600;color:#fff;line-height:1.5;margin-bottom:13px}
+.qeml{background:var(--bg);border:1px solid rgba(0,229,255,.1);padding:13px;margin-bottom:14px;font-family:'Share Tech Mono',monospace;font-size:.67rem;line-height:1.9;color:var(--t)}
+.qeml .ef{color:var(--t2);font-size:.62rem}.qeml .ef em{color:var(--r);font-style:normal}
+.qeml .es{color:var(--y);font-weight:700}
+.qopts{display:flex;flex-direction:column;gap:8px}
+.qopt{background:var(--bg);border:1px solid rgba(0,229,255,.1);padding:11px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;font-family:'Rajdhani',sans-serif;font-size:.9rem;color:var(--t);transition:all .2s;text-align:left;width:100%}
+.qopt:hover:not([disabled]){border-color:var(--c);background:rgba(0,229,255,.04)}
+.qopt.correct{border-color:var(--g)!important;background:rgba(0,255,157,.07)!important;color:var(--g)!important}
+.qopt.wrong{border-color:var(--r)!important;background:rgba(255,45,85,.07)!important;color:var(--r)!important}
+.qkey{font-family:'Share Tech Mono',monospace;font-size:.64rem;width:22px;height:22px;border:1px solid var(--t2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.qexp{background:var(--bg);border-left:3px solid var(--c);padding:12px 14px;margin-top:14px;font-size:.86rem;color:var(--t);line-height:1.7;display:none}
+.qexp.on{display:block}
+.qexp strong{font-family:'Share Tech Mono',monospace;font-size:.63rem;letter-spacing:2px;display:block;margin-bottom:4px}
+.qfoot{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+.qstrk{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--y)}
+.qnxt{background:var(--c);color:#000;border:none;padding:8px 20px;font-family:'Orbitron',monospace;font-size:.68rem;font-weight:700;letter-spacing:2px;cursor:pointer;display:none;transition:all .2s}
+.qnxt:hover{box-shadow:0 0 16px rgba(0,229,255,.45)}
+.qnxt.on{display:block}
+.qresult{max-width:640px;margin:0 auto;text-align:center;padding:26px 0}
+.rring{width:150px;height:150px;border-radius:50%;border:4px solid var(--c);margin:0 auto 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,229,255,.04)}
+.rsc{font-family:'Orbitron',monospace;font-size:3rem;font-weight:900;line-height:1}
+.rof{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--t2)}
+.rgrade{font-family:'Orbitron',monospace;font-size:1.3rem;color:#fff;margin-bottom:7px}
+.rmsg{color:var(--t2);font-size:.92rem;line-height:1.72;margin-bottom:22px}
+.rbd{background:var(--bg2);border:1px solid var(--br);padding:18px;text-align:left;margin-bottom:22px}
+.rbdt{font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:3px;color:var(--c);margin-bottom:12px}
+.rrow{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--br);gap:8px}
+.rrow:last-child{border-bottom:none}
+.rrow .rq{font-size:.84rem;color:var(--t);flex:1}
+.rrow .rm{font-family:'Share Tech Mono',monospace;font-size:.85rem;flex-shrink:0}
+.rm.ok{color:var(--g)}.rm.ng{color:var(--r)}
+.rbtns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+@media(max-width:900px){#sb{transform:translateX(100%)}#main{margin-right:0}.lp,.g2,.gauto,.tdcols,.dd,.awhero{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="pg-login" class="on">
+  <div id="login-bg" style="position:fixed;inset:0;pointer-events:none;overflow:hidden">
+    <div style="position:absolute;width:500px;height:500px;top:-80px;right:-80px;border-radius:50%;background:radial-gradient(circle,rgba(0,229,255,.05),transparent 70%);animation:float 8s ease-in-out infinite"></div>
+    <div style="position:absolute;width:350px;height:350px;bottom:-40px;left:60px;border-radius:50%;background:radial-gradient(circle,rgba(0,229,255,.04),transparent 70%);animation:float 11s ease-in-out infinite reverse"></div>
+  </div>
+  <div class="aw">
+    <div class="a-hd">
+      <div class="a-ico">🛡</div>
+      <h1 class="a-ttl">CYBERSHIELD</h1>
+      <p class="a-sub">// CYBERSECURITY AWARENESS PLATFORM</p>
+    </div>
+    <div class="tabs">
+      <button class="tab on" id="tl" onclick="stab('l')">LOGIN</button>
+      <button class="tab" id="tr" onclick="stab('r')">REGISTER</button>
+    </div>
+    <div class="ab">
+      <div class="pan on" id="pl">
+        <div class="info"><strong>Demo:</strong> Any valid email + any password</div>
+        <div class="err" id="le"></div>
+        <div class="fld"><label>Email</label><input type="email" id="lem" placeholder="you@example.com" onkeydown="if(event.key==='Enter')dologin()"/></div>
+        <div class="fld"><label>Password</label><input type="password" id="lpw" placeholder="Any password" onkeydown="if(event.key==='Enter')dologin()"/></div>
+        <button class="sbtn" onclick="dologin()">▶ ACCESS PLATFORM</button>
+        <div class="sw">New? <a onclick="stab('r')">Register</a></div>
+      </div>
+      <div class="pan" id="pr">
+        <div class="err" id="re"></div><div class="ok" id="rok"></div>
+        <div class="fld"><label>Full Name</label><input type="text" id="rnm" placeholder="Your name"/></div>
+        <div class="fld"><label>Email</label><input type="email" id="rem" placeholder="your@email.com"/></div>
+        <div class="fld">
+          <label>Password</label>
+          <input type="password" id="rpw" placeholder="Create a password" oninput="pwst(this.value)" onkeydown="if(event.key==='Enter')doreg()"/>
+          <div class="pw-bg"><div class="pw-fill" id="pwf"></div></div>
+          <div class="pw-lbl" id="pwl">// Enter a password</div>
+        </div>
+        <div class="fld"><label>Confirm Password</label><input type="password" id="rpw2" placeholder="Repeat password" onkeydown="if(event.key==='Enter')doreg()"/></div>
+        <button class="sbtn" onclick="doreg()">▶ CREATE ACCOUNT</button>
+        <div class="sw">Have account? <a onclick="stab('l')">Login</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="shell">
+  <button id="logout" onclick="dologout()">⏻ LOGOUT</button>
+  <nav id="sb">
+    <div class="sb-logo">
+      <div class="sb-ico">🛡</div>
+      <h2>CYBERSHIELD</h2><p>// PLATFORM</p>
+    </div>
+    <div class="sb-nav">
+      <button class="sbn" data-pg="vision">🎯 Vision</button>
+      <button class="sbn" data-pg="about">ℹ About</button>
+      <button class="sbn" data-pg="home">🏠 Home</button>
+      <button class="sbn" data-pg="threats">⚠ Threats</button>
+      <button class="sbn" data-pg="awareness">🧠 Awareness</button>
+      <button class="sbn" data-pg="quiz">📝 Quiz</button>
+    </div>
+    <div class="sb-foot"><span id="sbnm">User</span><div id="sbem" style="opacity:.5;font-size:.52rem;word-break:break-all"></div></div>
+  </nav>
+  <main id="main"></main>
+</div>
+
+<script>
+/* STATE */
+let U=null,pg='',users={},fi=0,ftmr=null,qtmr=null,qs=null;
+
+/* AUTH */
+function stab(t){
+  ['l','r'].forEach(x=>{
+    document.getElementById('t'+x).classList.toggle('on',x===t);
+    document.getElementById('p'+x).classList.toggle('on',x===t);
+  });
+  ['le','re','rok'].forEach(id=>{const e=document.getElementById(id);if(e){e.classList.remove('on');e.textContent=''}});
+}
+function serr(id,m){const e=document.getElementById(id);if(e){e.textContent=m;e.classList.add('on')}}
+function herr(id){const e=document.getElementById(id);if(e){e.classList.remove('on');e.textContent=''}}
+function vem(e){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)}
+function pwst(v){
+  const f=document.getElementById('pwf'),l=document.getElementById('pwl');if(!f||!l)return;
+  let s=0;if(v.length>=8)s++;if(/[A-Z]/.test(v))s++;if(/[0-9]/.test(v))s++;if(/[^A-Za-z0-9]/.test(v))s++;
+  const m=[['0%','transparent','// Enter a password'],['25%','var(--r)','// WEAK'],['50%','var(--o)','// FAIR'],['75%','var(--y)','// GOOD'],['100%','var(--g)','// STRONG']];
+  f.style.width=m[s][0];f.style.background=m[s][1];l.textContent=m[s][2];
+}
+function dologin(){
+  herr('le');
+  const em=document.getElementById('lem').value.trim(),pw=document.getElementById('lpw').value;
+  if(!em){serr('le','⚠ Enter your email');return}
+  if(!vem(em)){serr('le','⚠ Invalid email');return}
+  if(!pw){serr('le','⚠ Enter your password');return}
+  if(users[em]&&users[em].pw!==pw){serr('le','⚠ Incorrect password');return}
+  lsuccess(users[em]?users[em].name:em.split('@')[0],em);
+}
+function doreg(){
+  herr('re');
+  const rok=document.getElementById('rok');if(rok){rok.classList.remove('on');rok.textContent=''}
+  const nm=document.getElementById('rnm').value.trim(),em=document.getElementById('rem').value.trim(),
+        pw=document.getElementById('rpw').value,pw2=document.getElementById('rpw2').value;
+  if(!nm){serr('re','⚠ Enter your name');return}
+  if(!em||!vem(em)){serr('re','⚠ Invalid email');return}
+  if(pw.length<6){serr('re','⚠ Password min 6 chars');return}
+  if(pw!==pw2){serr('re','⚠ Passwords do not match');return}
+  if(users[em]){serr('re','⚠ Email already registered');return}
+  users[em]={name:nm,pw};
+  if(rok){rok.textContent='✓ Account created! Logging in…';rok.classList.add('on')}
+  setTimeout(()=>lsuccess(nm,em),900);
+}
+function lsuccess(name,email){
+  U={name,email};
+  document.getElementById('sbnm').textContent=name;
+  document.getElementById('sbem').textContent=email;
+  document.getElementById('pg-login').classList.remove('on');
+  document.getElementById('shell').classList.add('on');
+  document.getElementById('logout').classList.add('on');
+  gopage('home');
+}
+function dologout(){
+  U=null;clearInterval(qtmr);clearInterval(ftmr);qs=null;
+  document.getElementById('shell').classList.remove('on');
+  document.getElementById('logout').classList.remove('on');
+  document.getElementById('pg-login').classList.add('on');
+  ['lem','lpw','rnm','rem','rpw','rpw2'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});
+  const pf=document.getElementById('pwf'),pl=document.getElementById('pwl');
+  if(pf){pf.style.width='0';pf.style.background='transparent'}
+  if(pl)pl.textContent='// Enter a password';
+  ['le','re','rok'].forEach(id=>{const e=document.getElementById(id);if(e){e.classList.remove('on');e.textContent=''}});
+}
+
+/* ROUTER */
+document.querySelectorAll('.sbn').forEach(b=>b.addEventListener('click',()=>gopage(b.dataset.pg)));
+function gopage(p){
+  pg=p;
+  document.querySelectorAll('.sbn').forEach(b=>b.classList.toggle('on',b.dataset.pg===p));
+  const m=document.getElementById('main');
+  m.innerHTML='';m.scrollTop=0;window.scrollTo(0,0);
+  ({vision:rVision,about:rAbout,home:rHome,threats:rThreats,awareness:rAwareness,quiz:rQuiz})[p]?.(m);
+  setTimeout(()=>m.querySelectorAll('.reveal').forEach(e=>e.classList.add('in')),60);
+}
+
+/* VISION */
+function rVision(c){c.innerHTML=`
+<div class="ph reveal"><span class="plbl">// 001 — FOUNDATION</span><h1 class="pttl">Our <em>Vision</em></h1><p class="psub">The philosophy, mission, and roadmap behind CyberShield — building a safer digital world through education.</p></div>
+<div class="card reveal" style="background:linear-gradient(135deg,rgba(0,229,255,.04),rgba(155,89,255,.04));margin-bottom:20px"><p style="font-family:'Orbitron',monospace;font-size:clamp(.95rem,2vw,1.35rem);font-weight:700;color:#fff;line-height:1.55">"In the digital age, <em style="font-style:normal;color:var(--c)">knowledge is your first line of defense</em>. Cybersecurity is not a product — it is a <em style="font-style:normal;color:var(--c)">mindset</em>."</p></div>
+<h2 class="sec reveal">Core Pillars</h2>
+<div class="gauto reveal">
+  <div class="card"><div style="font-size:2.2rem;margin-bottom:12px">🔐</div><h3 style="font-family:'Orbitron',monospace;font-size:.85rem;color:#fff;margin-bottom:8px">Educate First</h3><p style="font-size:.85rem;color:var(--t2);line-height:1.7">Prevention starts with awareness. Complex security concepts made accessible for everyone.</p></div>
+  <div class="card"><div style="font-size:2.2rem;margin-bottom:12px">🌐</div><h3 style="font-family:'Orbitron',monospace;font-size:.85rem;color:#fff;margin-bottom:8px">Universal Access</h3><p style="font-size:.85rem;color:var(--t2);line-height:1.7">Enterprise-grade threat intelligence, freely accessible to all users regardless of expertise.</p></div>
+  <div class="card"><div style="font-size:2.2rem;margin-bottom:12px">⚡</div><h3 style="font-family:'Orbitron',monospace;font-size:.85rem;color:#fff;margin-bottom:8px">Real-World Focus</h3><p style="font-size:.85rem;color:var(--t2);line-height:1.7">Every guide and quiz is grounded in real incidents and current attack vectors — no fluff.</p></div>
+  <div class="card"><div style="font-size:2.2rem;margin-bottom:12px">🤝</div><h3 style="font-family:'Orbitron',monospace;font-size:.85rem;color:#fff;margin-bottom:8px">Community Defense</h3><p style="font-size:.85rem;color:var(--t2);line-height:1.7">Shared responsibility where every user becomes an active participant in their own security.</p></div>
+</div>
+<h2 class="sec reveal">Roadmap</h2>
+<div class="reveal">
+  ${[['2024','Platform Launch','Core threat intelligence, awareness training, and interactive quiz engine.'],['Q1 2025','Live Threat Feed','Real-time intelligence feeds showing global cyberattack trends.'],['Q3 2025','Adaptive Learning','AI-powered personalized learning paths based on user performance.'],['2026','Enterprise Certs','Industry-recognized certifications and organizational risk assessments.']].map(([yr,ttl,desc])=>`
+  <div style="display:flex;gap:18px;margin-bottom:18px">
+    <div style="flex-shrink:0;font-family:'Orbitron',monospace;font-size:.7rem;color:var(--c);background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.22);padding:5px 9px;text-align:center;align-self:flex-start;min-width:72px">${yr}</div>
+    <div class="card" style="flex:1"><h4 style="font-family:'Orbitron',monospace;font-size:.78rem;color:#fff;margin-bottom:5px">${ttl}</h4><p style="font-size:.84rem;color:var(--t2);line-height:1.62">${desc}</p></div>
+  </div>`).join('')}
+</div>`}
+
+/* ABOUT */
+function rAbout(c){c.innerHTML=`
+<div class="ph reveal"><span class="plbl">// 002 — PLATFORM INFO</span><h1 class="pttl">About <em>CyberShield</em></h1><p class="psub">A cybersecurity awareness platform designed to educate, train, and empower individuals against modern digital threats.</p></div>
+<div class="card reveal" style="margin-bottom:20px">
+  <p style="color:var(--t2);font-size:.93rem;line-height:1.82;margin-bottom:13px">CyberShield was built on a singular belief: <strong style="color:var(--c)">the human element is the most exploited vulnerability</strong>. Over 90% of successful cyberattacks begin with a human mistake.</p>
+  <p style="color:var(--t2);font-size:.93rem;line-height:1.82;margin-bottom:13px">Our platform bridges the gap between complex security concepts and everyday understanding — for beginners and professionals alike.</p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+    <span class="badge bc_">🛡 AWARENESS</span><span class="badge bg_">✓ FREE</span><span class="badge bo_">⚡ REAL-TIME</span><span class="badge by_">📊 INTERACTIVE</span>
+  </div>
+</div>
+<h2 class="sec reveal">Features</h2>
+<div class="reveal" style="display:flex;flex-direction:column;gap:10px">
+  ${[['⚠','Threat Library','6 major attack type profiles with real-world case studies, statistics, and defenses.'],
+     ['🧠','Awareness Training','Do/Don\'t guides for passwords, email, browsing, mobile, and cloud security.'],
+     ['📝','Quiz Engine','Timed, scored quizzes with instant feedback, explanations, and streak bonuses.'],
+     ['📡','Live Dashboard','Simulated real-time threat feed and attack vector metrics.']].map(([ic,ttl,desc])=>`
+  <div class="card" style="display:flex;gap:13px;align-items:flex-start">
+    <div style="font-size:1.4rem;flex-shrink:0;width:38px;height:38px;background:rgba(0,229,255,.08);border:1px solid var(--br);display:flex;align-items:center;justify-content:center">${ic}</div>
+    <div><h4 style="font-family:'Orbitron',monospace;font-size:.78rem;color:#fff;margin-bottom:4px">${ttl}</h4><p style="font-size:.84rem;color:var(--t2);line-height:1.6">${desc}</p></div>
+  </div>`).join('')}
+</div>
+<div class="card reveal" style="margin-top:18px;text-align:center">
+  <h2 class="sec" style="justify-content:center;margin-bottom:12px">Built With</h2>
+  <div style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">
+    ${['HTML5','CSS3','JavaScript ES6+','Orbitron','Share Tech Mono','Rajdhani','Zero Dependencies'].map(c=>`<span style="font-family:'Share Tech Mono',monospace;font-size:.65rem;padding:4px 11px;border:1px solid rgba(0,229,255,.22);color:var(--c);background:rgba(0,229,255,.05)">${c}</span>`).join('')}
+  </div>
+</div>`}
+
+/* HOME */
+const FEV=[
+  {c:'fr',t:'Ransomware attack — Healthcare sector, US-East',tm:'00:12'},
+  {c:'fo',t:'Phishing campaign — 2,400 emails blocked',tm:'00:31'},
+  {c:'fy',t:'SQL injection on government portal — mitigated',tm:'01:04'},
+  {c:'fr',t:'DDoS 380 Gbps peak — CDN provider',tm:'01:22'},
+  {c:'fg',t:'Critical patch — CVE-2025-0312 resolved',tm:'01:55'},
+  {c:'fo',t:'Credential stuffing — e-commerce platform',tm:'02:17'},
+  {c:'fy',t:'Suspicious DNS tunneling detected',tm:'02:40'},
+  {c:'fr',t:'Zero-day in wild — browser engine',tm:'03:05'},
+];
+function rHome(c){
+  const ti=['Ransomware up 23% Q1 2025','New phishing kit targets MFA','AI deepfakes in CEO fraud','Supply chain via npm','3.2B credentials leaked','Zero-day VPN software patched'];
+  const tk=[...ti,...ti].map(t=>`<span class="titem">${t}</span>`).join('');
+  c.innerHTML=`
+<div class="ph reveal"><span class="plbl">// 003 — DASHBOARD</span><h1 class="pttl"><em>Threat</em> Intelligence Hub</h1><p class="psub">Live overview of the global cybersecurity landscape. Stay informed, stay protected.</p></div>
+<div class="ticker reveal"><div class="tlbl"><span class="ldot"></span> LIVE</div><div class="ttrack">${tk}</div></div>
+<div class="gauto reveal" style="margin-bottom:18px">
+  <div class="sc" style="--sc:var(--r)"><span class="n">4.2B</span><span class="l">Records Breached 2024</span></div>
+  <div class="sc" style="--sc:var(--o)"><span class="n">$4.8M</span><span class="l">Avg Breach Cost</span></div>
+  <div class="sc" style="--sc:var(--y)"><span class="n">94%</span><span class="l">Attacks via Email</span></div>
+  <div class="sc" style="--sc:var(--g)"><span class="n">277</span><span class="l">Days Avg Detection</span></div>
+</div>
+<div class="lp reveal">
+  <div class="lbox"><div class="lhd"><span class="lhdt"><span class="ldot"></span> THREAT FEED</span><span class="badge br_">LIVE</span></div><div id="lfeed"></div></div>
+  <div class="lbox"><div class="lhd"><span class="lhdt">ATTACK VECTORS</span></div><div id="meters"></div></div>
+</div>
+<h2 class="sec reveal">Threat Categories</h2>
+<div class="gauto reveal">
+  ${[['🎣','Phishing','Deceptive emails trick users into revealing credentials.','var(--r)','br_','CRITICAL'],
+     ['💀','Ransomware','Malware encrypts files and demands payment for decryption.','var(--o)','bo_','CRITICAL'],
+     ['🎭','Social Eng.','Psychological manipulation to divulge confidential data.','var(--y)','by_','HIGH'],
+     ['🔑','Password Atk','Brute force and credential stuffing against weak passwords.','var(--p)','bc_','HIGH'],
+     ['🕵️','MitM','Intercepting communications between two parties.','var(--c)','bc_','MEDIUM'],
+     ['💉','SQL Injection','Malicious SQL code to manipulate databases.','var(--g)','by_','HIGH'],
+  ].map(([ic,nm,ds,htc,bc,sv])=>`<div class="htc" style="--htc:${htc}" onclick="gopage('threats')"><span class="hic">${ic}</span><div class="hnm">${nm}</div><div class="hds">${ds}</div><span class="badge ${bc}">${sv}</span></div>`).join('')}
+</div>`;
+  setTimeout(()=>{pfeed();pmeters()},150);
+}
+function pfeed(){
+  const f=document.getElementById('lfeed');if(!f)return;
+  f.innerHTML='';
+  FEV.slice(0,5).forEach(ev=>{
+    const d=document.createElement('div');d.className='fi';
+    d.innerHTML=`<span class="fd ${ev.c}"></span><span class="ft">${ev.t}</span><span class="ftm">${ev.tm} ago</span>`;
+    f.appendChild(d);
+  });
+  clearInterval(ftmr);
+  ftmr=setInterval(()=>{
+    if(pg!=='home')return;
+    const f2=document.getElementById('lfeed');if(!f2)return;
+    fi=(fi+1)%FEV.length;const ev=FEV[fi];
+    const d=document.createElement('div');d.className='fi';
+    d.innerHTML=`<span class="fd ${ev.c}"></span><span class="ft">${ev.t}</span><span class="ftm">just now</span>`;
+    f2.insertBefore(d,f2.firstChild);
+    if(f2.children.length>5)f2.removeChild(f2.lastChild);
+  },4000);
+}
+function pmeters(){
+  const c=document.getElementById('meters');if(!c)return;
+  const ms=[{n:'Phishing',p:68,m1:'var(--r)',m2:'var(--o)'},{n:'Ransomware',p:54,m1:'var(--o)',m2:'var(--y)'},
+            {n:'Social Eng.',p:42,m1:'var(--y)',m2:'var(--c)'},{n:'Malware',p:38,m1:'var(--p)',m2:'var(--c)'},
+            {n:'Insider',p:22,m1:'var(--c)',m2:'var(--g)'}];
+  c.innerHTML=ms.map(m=>`<div class="mr"><div class="ml"><span class="mn">${m.n}</span><span class="mp" style="color:${m.m1}">${m.p}%</span></div><div class="mb"><div class="mf" data-w="${m.p}" style="--m1:${m.m1};--m2:${m.m2}"></div></div></div>`).join('');
+  setTimeout(()=>c.querySelectorAll('.mf').forEach(f=>f.style.width=f.dataset.w+'%'),200);
+}
+
+/* THREATS */
+const TH=[
+  {ic:'🎣',nm:'Phishing Attacks',sh:'Deceptive messages to steal sensitive information',sv:'CRITICAL',col:'var(--r)',
+   intro:'Phishing is responsible for over 36% of all data breaches. Attackers impersonate trusted entities via email or SMS to steal passwords or install malware.',
+   stats:[{v:'3.4B',l:'Phishing Emails/Day'},{v:'36%',l:'Of All Breaches'},{v:'$17,700',l:'Loss/Min'},{v:'97%',l:"Can't Spot It"}],
+   signs:['Urgent language demanding immediate action','Sender domain does not match official domain','Links differ from displayed text','Unexpected attachments'],
+   def:['Verify sender email before clicking','Never enter credentials via email links','Enable MFA on all accounts','Use anti-phishing email filters'],
+   cs:{t:'Google & Facebook — $122M Lost',b:'Hacker posed as a Taiwanese vendor and sent fake invoices to Google and Facebook, stealing $122M over two years.',d:'$122M stolen via fake invoices'},
+   steps:['Receive fake email from "your bank"','Click link to fake login page','Enter credentials','Attacker captures data in real-time','Accounts drained or sold']},
+  {ic:'💀',nm:'Ransomware',sh:'Malware that encrypts files and extorts payment',sv:'CRITICAL',col:'var(--o)',
+   intro:'Ransomware encrypts victim files and demands cryptocurrency for decryption. Modern operations run like businesses with support teams and affiliate programs.',
+   stats:[{v:'$1.1B',l:'Ransoms Paid 2023'},{v:'22 Days',l:'Avg Recovery'},{v:'66%',l:'Orgs Attacked'},{v:'11s',l:'New Attack'}],
+   signs:['Files renamed with .locked or .encrypted','Cannot open documents','Ransom note on desktop','System slows dramatically'],
+   def:['Maintain offline backups (3-2-1 rule)','Keep all software patched and updated','Deploy endpoint detection (EDR)','Never pay ransom — it funds future attacks'],
+   cs:{t:'Colonial Pipeline 2021 — $4.4M Ransom',b:'DarkSide ransomware shut down 5,500 miles of US fuel pipeline. The company paid $4.4M in Bitcoin.',d:'$4.4M paid, fuel shortages across eastern US'},
+   steps:['Attacker gains access via phishing','Malware spreads across network','Files silently encrypted','Ransom note appears','Pay, restore backup, or lose data']},
+  {ic:'🎭',nm:'Social Engineering',sh:'Psychological manipulation to trick humans',sv:'HIGH',col:'var(--y)',
+   intro:'Social engineering exploits human psychology rather than technical flaws — manipulating people into divulging information through deception and trust exploitation.',
+   stats:[{v:'98%',l:'Use Social Eng.'},{v:'$130K',l:'Avg BEC Loss'},{v:'43s',l:'Avg Vishing Call'},{v:'2.6x',l:'Faster than Malware'}],
+   signs:['Unsolicited contact claiming authority','Requests for passwords over phone or email','Too-good-to-be-true offers','Pressure tactics: "Act now!"'],
+   def:['Legitimate IT never needs your password','Verify callers through official channels','Be skeptical of unsolicited contacts','Establish verification protocols for requests'],
+   cs:{t:'Twitter Hack 2020 — $120K Lost',b:'Attackers "vished" Twitter employees into giving credentials, hijacking 130 celebrity accounts for a Bitcoin scam.',d:'$120K stolen, massive reputational damage'},
+   steps:['Research target online','Contact posing as authority','Build false trust','Request sensitive info or action','Exploit access before detection']},
+  {ic:'🔑',nm:'Password Attacks',sh:'Cracking or stealing credentials for unauthorized access',sv:'HIGH',col:'var(--p)',
+   intro:'Brute force, dictionary attacks, and credential stuffing exploit weak or reused passwords. Billions of stolen credentials on the dark web fuel automated attacks.',
+   stats:[{v:'81%',l:'Breaches via Weak PW'},{v:'15B',l:'Stolen Credentials'},{v:'2.5s',l:'Crack "password1"'},{v:'65%',l:'Reuse Passwords'}],
+   signs:['Unexpected login notifications','Account locked — too many attempts','Unfamiliar account activity','Password reset emails you did not request'],
+   def:['Use a password manager for unique passwords','Enable MFA on every account','Never reuse passwords across sites','Use 16+ character passphrases'],
+   cs:{t:'LinkedIn 2021 — 700M Records Scraped',b:'700M LinkedIn records including emails and phone numbers were posted for sale, enabling mass credential stuffing.',d:'700M+ profiles exposed worldwide'},
+   steps:['Obtain credentials from breach','Automated tools test across services','Reused passwords = compromised accounts','Attacker changes recovery info','Data stolen or pivoted to other systems']},
+  {ic:'🕵️',nm:'Man-in-the-Middle',sh:'Intercepting communications without knowledge',sv:'HIGH',col:'var(--c)',
+   intro:'MitM attacks intercept and potentially alter communications between parties who believe they are talking directly. Most common on public Wi-Fi via ARP spoofing or SSL stripping.',
+   stats:[{v:'35%',l:'Exploits Use MitM'},{v:'$850K',l:'Avg Breach Cost'},{v:'95%',l:'On Public Wi-Fi'},{v:'2.3M',l:'Daily Attempts'}],
+   signs:['Unexpected certificate warnings','Slow internet despite good signal','Disconnected from known networks','Websites look slightly different'],
+   def:['Avoid public Wi-Fi for sensitive tasks','Always verify HTTPS before entering data','Use a reputable VPN on public networks','Keep devices patched against ARP attacks'],
+   cs:{t:'Europol Dark Web MitM 2017',b:'A MitM operation intercepted cryptocurrency transactions on dark web markets, rerouting millions to attacker wallets.',d:'Millions in cryptocurrency intercepted'},
+   steps:['Attacker joins network or poisons ARP','All victim traffic routed through attacker','Traffic decrypted and captured','Credentials and tokens stolen','Victim remains unaware']},
+  {ic:'💉',nm:'SQL Injection',sh:'Inserting malicious code into database queries',sv:'HIGH',col:'var(--g)',
+   intro:'SQLi lets attackers bypass authentication, extract databases, and sometimes execute system commands by inserting malicious SQL into web form inputs.',
+   stats:[{v:'#3',l:'OWASP Top 10'},{v:'65%',l:'Apps Vulnerable'},{v:'$1.4M',l:'Avg Breach Cost'},{v:'40K',l:'Daily Attempts'}],
+   signs:['Database error messages on website','Login bypass without valid credentials','Unusual query times','SQL syntax in URL parameters'],
+   def:['Use parameterized queries always','Implement Web Application Firewall (WAF)','Validate and sanitize all user inputs','Apply least privilege to database accounts'],
+   cs:{t:'Heartland 2008 — 130M Cards Stolen',b:'SQL injection compromised the 9th largest US payment processor, stealing 130M credit/debit cards.',d:'130M cards, $140M in fines'},
+   steps:['Identify input field linked to database',"Test with ' OR 1=1 --",'Craft query to extract data','Dump entire database','Exploit for fraud or sell on dark web']},
+];
+function rThreats(c){
+  c.innerHTML=`
+<div class="ph reveal"><span class="plbl">// 004 — THREAT INTEL</span><h1 class="pttl">Cyber <em>Threats</em> Library</h1><p class="psub">In-depth profiles of the most dangerous cyber threats. Click any threat to expand details, statistics, and defenses.</p></div>
+<div id="tlist" class="reveal">
+${TH.map((t,i)=>`
+<div class="td">
+  <div class="tdhd" data-i="${i}">
+    <span class="tdic">${t.ic}</span>
+    <div class="tdm"><div class="tdnm">${t.nm}</div><div class="tdsh">${t.sh}</div></div>
+    <div style="display:flex;align-items:center;gap:9px">
+      <span class="badge ${t.sv==='CRITICAL'?'br_':t.sv==='HIGH'?'bo_':'by_'}">${t.sv}</span>
+      <span class="tdar" id="ar${i}">▶</span>
+    </div>
+  </div>
+  <div class="tdb" id="tb${i}">
+    <p class="tdi">${t.intro}</p>
+    <div class="tds">${t.stats.map(s=>`<div class="ts"><span class="tv" style="color:${t.col}">${s.v}</span><span class="tl">${s.l}</span></div>`).join('')}</div>
+    <div class="tdcols">
+      <div class="tdcol"><h4>⚠ WARNING SIGNS</h4><ul class="tli">${t.signs.map(s=>`<li>${s}</li>`).join('')}</ul></div>
+      <div class="tdcol"><h4>🛡 DEFENSES</h4><ul class="tli">${t.def.map(d=>`<li>${d}</li>`).join('')}</ul></div>
+    </div>
+    <div class="cs"><span class="cstag">// CASE STUDY</span><h4>${t.cs.t}</h4><p>${t.cs.b}</p><span class="csdmg">⚡ ${t.cs.d}</span></div>
+    <div style="margin-top:14px"><h4 style="font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:3px;color:var(--c);margin-bottom:9px">// ATTACK LIFECYCLE</h4>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">${t.steps.map((s,j)=>`<div class="card" style="position:relative;padding-right:32px"><span style="position:absolute;top:10px;right:12px;font-family:'Orbitron',monospace;font-size:1.6rem;font-weight:900;color:rgba(0,229,255,.08);line-height:1">0${j+1}</span><p style="font-size:.83rem;color:var(--t2);line-height:1.62">${s}</p></div>`).join('')}</div></div>
+  </div>
+</div>`).join('')}
+</div>`;
+  c.querySelectorAll('.tdhd[data-i]').forEach(h=>h.addEventListener('click',()=>togTh(parseInt(h.dataset.i))));
+}
+function togTh(i){
+  const b=document.getElementById('tb'+i),a=document.getElementById('ar'+i);if(!b||!a)return;
+  const op=b.classList.contains('on');
+  b.classList.toggle('on',!op);a.classList.toggle('on',!op);
+}
+
+/* AWARENESS */
+const AM=[
+  {ic:'🔑',ttl:'Password Security',body:`<p style="color:var(--t2);font-size:.9rem;line-height:1.78;margin-bottom:14px">Strong passwords are your first line of defense. A compromised password gives attackers full access to your accounts.</p><div class="dd"><div class="doc"><div class="ddt">✓ DO THIS</div><ul class="ddl"><li>Use 16+ character passphrases</li><li>Use a password manager (Bitwarden, 1Password)</li><li>Enable MFA on every account</li><li>Use a unique password per site</li><li>Change passwords after any breach</li></ul></div><div class="dnc"><div class="ddt">✗ AVOID</div><ul class="ddl"><li>Reusing passwords across sites</li><li>Using personal info (birthdays, names)</li><li>Sharing passwords via email or SMS</li><li>Patterns like Password1! or Summer2024</li><li>Storing passwords in plain text files</li></ul></div></div>`},
+  {ic:'📧',ttl:'Email Safety',body:`<p style="color:var(--t2);font-size:.9rem;line-height:1.78;margin-bottom:14px">Email is the #1 attack vector. 3.4 billion phishing emails are sent daily. A critical eye prevents most attacks.</p><div class="dd"><div class="doc"><div class="ddt">✓ DO THIS</div><ul class="ddl"><li>Check full sender email, not display name</li><li>Hover links to preview actual URL</li><li>Verify requests via a separate channel</li><li>Report suspicious emails to IT</li><li>Keep email software updated</li></ul></div><div class="dnc"><div class="ddt">✗ AVOID</div><ul class="ddl"><li>Clicking links in unexpected emails</li><li>Opening attachments from unknown senders</li><li>Entering credentials via email links</li><li>Responding to password requests</li><li>Acting on urgent demands without verifying</li></ul></div></div>`},
+  {ic:'🌐',ttl:'Safe Browsing',body:`<p style="color:var(--t2);font-size:.9rem;line-height:1.78;margin-bottom:14px">The web is full of malicious sites and drive-by downloads. Safe browsing protects your device and privacy.</p><div class="dd"><div class="doc"><div class="ddt">✓ DO THIS</div><ul class="ddl"><li>Verify HTTPS 🔒 before entering data</li><li>Keep browser and extensions updated</li><li>Use a reputable ad blocker (uBlock Origin)</li><li>Download only from official sources</li><li>Use VPN on public Wi-Fi</li></ul></div><div class="dnc"><div class="ddt">✗ AVOID</div><ul class="ddl"><li>Ignoring browser security warnings</li><li>Downloading cracked software or torrents</li><li>Banking on public Wi-Fi</li><li>Installing unknown browser extensions</li><li>Clicking pop-ups about infected devices</li></ul></div></div>`},
+  {ic:'📱',ttl:'Mobile Security',body:`<p style="color:var(--t2);font-size:.9rem;line-height:1.78;margin-bottom:14px">Mobile devices carry sensitive data and face unique threats: malicious apps, smishing, and physical theft.</p><div class="dd"><div class="doc"><div class="ddt">✓ DO THIS</div><ul class="ddl"><li>Enable screen lock with strong PIN or biometric</li><li>Enable full-device encryption</li><li>Install apps from official stores only</li><li>Keep OS and apps patched</li><li>Enable remote wipe capability</li></ul></div><div class="dnc"><div class="ddt">✗ AVOID</div><ul class="ddl"><li>Jailbreaking or rooting your device</li><li>Granting excessive app permissions</li><li>Clicking links in unexpected SMS (smishing)</li><li>Public USB charging stations (juice jacking)</li><li>Leaving Bluetooth on unnecessarily</li></ul></div></div>`},
+  {ic:'☁️',ttl:'Cloud & Data Safety',body:`<p style="color:var(--t2);font-size:.9rem;line-height:1.78;margin-bottom:14px">Cloud misconfigurations lead to millions of exposed records annually. Control your access settings.</p><div class="dd"><div class="doc"><div class="ddt">✓ DO THIS</div><ul class="ddl"><li>Review who has access to shared files</li><li>Encrypt sensitive files before uploading</li><li>Enable login notifications</li><li>Backup to offline location (3-2-1 rule)</li><li>Revoke unused third-party integrations</li></ul></div><div class="dnc"><div class="ddt">✗ AVOID</div><ul class="ddl"><li>Sharing data via public links without password</li><li>Reusing passwords for cloud accounts</li><li>Storing unencrypted sensitive docs in cloud</li><li>Ignoring security alert notifications</li><li>Granting admin to unverified third-parties</li></ul></div></div>`},
+];
+function rAwareness(c){
+  c.innerHTML=`
+<div class="ph reveal"><span class="plbl">// 005 — TRAINING</span><h1 class="pttl">Security <em>Awareness</em></h1><p class="psub">Practical cybersecurity guidance. Expand each module to learn Do's and Don'ts.</p></div>
+<div class="awhero reveal">
+  <div>
+    <h3 style="font-family:'Orbitron',monospace;font-size:1rem;color:#fff;margin-bottom:8px">Your Awareness Score</h3>
+    <p style="color:var(--t2);font-size:.88rem;line-height:1.65">Complete modules and take the quiz to improve your personal security posture.</p>
+    <div style="margin-top:12px"><button class="btn-p" onclick="gopage('quiz')">▶ TAKE THE QUIZ</button></div>
+  </div>
+  <div class="sring"><span class="srn">A+</span><span class="srl">SCORE</span></div>
+</div>
+<h2 class="sec reveal">Training Modules</h2>
+<div class="reveal">
+  ${AM.map((m,i)=>`
+  <div class="acc">
+    <div class="acchd" id="ah${i}" data-ai="${i}"><span style="font-size:1.2rem">${m.ic}</span><span class="accttl">${m.ttl}</span><span class="accarr">▶</span></div>
+    <div class="accbd" id="ab${i}">${m.body}</div>
+  </div>`).join('')}
+</div>`;
+  c.querySelectorAll('.acchd[data-ai]').forEach(h=>h.addEventListener('click',()=>togAcc(parseInt(h.dataset.ai))));
+}
+function togAcc(i){
+  const hd=document.getElementById('ah'+i),bd=document.getElementById('ab'+i);if(!hd||!bd)return;
+  const op=hd.classList.contains('on');
+  document.querySelectorAll('.acchd').forEach(h=>h.classList.remove('on'));
+  document.querySelectorAll('.accbd').forEach(b=>b.classList.remove('on'));
+  if(!op){hd.classList.add('on');bd.classList.add('on')}
+}
+
+/* QUIZ */
+const QS=[
+  {cat:'PHISHING',q:'You receive an email from "security@paypa1.com" asking to verify your account. What should you do?',
+   eml:{from:'security@paypa1.com',subj:'⚠ Urgent: Verify Your Account',body:'Your PayPal account is limited. Click below within 24 hours or it will be permanently suspended.\n\n[Verify Now]'},
+   opts:['Click the link and verify immediately','Check the domain — "paypa1.com" uses number "1" not letter "l"','Forward to contacts to warn them','Reply asking if it\'s legitimate'],
+   ans:1,exp:'"paypa1.com" uses the number "1" instead of letter "l" — a classic typosquatting trick. Always inspect sender domains carefully.'},
+  {cat:'PASSWORDS',q:'Which password strategy is MOST secure?',
+   opts:['One strong password (P@ssw0rd!) used everywhere','Password manager with unique 20+ char passwords per account','Write unique passwords on paper in a desk drawer','Email + birthdate combo, unique and memorable'],
+   ans:1,exp:'A password manager generating unique passwords per account eliminates credential stuffing risk. It\'s the only strategy that scales securely.'},
+  {cat:'RANSOMWARE',q:'Files are renamed ".encrypted" and a Bitcoin demand appears. What is the CORRECT first action?',
+   opts:['Pay the ransom immediately','Immediately disconnect from the network, then restore from backup','Manually delete the ransomware files','Restart the computer — might fix it'],
+   ans:1,exp:'Disconnecting prevents spread to other devices. Paying ransom funds criminals and doesn\'t guarantee recovery. Always restore from clean backups.'},
+  {cat:'SOCIAL ENG.',q:'"IT" calls needing your password to fix a critical issue. They know your name and employee ID. What do you do?',
+   opts:['Provide it — they know your details so it\'s clearly IT','Decline — legitimate IT never needs your password','Give a temporary password you\'ll change later','Ask them to email you officially first'],
+   ans:1,exp:'Legitimate IT departments NEVER need your password. Knowing your name proves nothing — this is a classic pretexting attack.'},
+  {cat:'PUBLIC WI-FI',q:'At a coffee shop, you need to check your bank. Free Wi-Fi is available. What is safest?',
+   opts:['Connect — HTTPS makes it safe on any network','Connect but avoid the bank site','Use mobile data or personal hotspot with VPN','Ask the barista for the official network name'],
+   ans:2,exp:'Public Wi-Fi is untrustworthy. Even HTTPS doesn\'t protect against all MitM attacks. Mobile data with VPN is the only safe choice for banking.'},
+  {cat:'UPDATES',q:'Windows shows critical security updates available. You\'re mid-work. What do you do?',
+   opts:['Disable automatic updates to avoid interruption','Schedule the update for today, once current work is saved','Ignore — updates are mostly feature additions','Wait a month for the update to stabilize'],
+   ans:1,exp:'Security updates patch actively-exploited vulnerabilities. Delay increases your risk. Critical patches often address zero-days already in the wild.'},
+  {cat:'MFA',q:'A site offers SMS or Authenticator App for 2FA. Which and why?',
+   opts:['SMS — simpler and faster in daily use','Authenticator app — SMS can be intercepted via SIM swapping','Either — the difference is negligible','Neither — 2FA makes recovery harder'],
+   ans:1,exp:'Authenticator apps generate codes locally — unreachable remotely. SMS 2FA is vulnerable to SIM swapping. App-based MFA is significantly more secure.'},
+  {cat:'BREACHES',q:'An email says your data was breached and includes a link to check. What do you do?',
+   opts:['Click — sent by the company to help you','Ignore — probably spam','Go directly to HaveIBeenPwned.com without clicking the link','Forward to friends to warn them'],
+   ans:2,exp:'Breach notification emails are commonly phishing attacks themselves. Navigate directly to haveibeenpwned.com — never click links in these emails.'},
+  {cat:'MALWARE',q:'You download free software from a third-party site. Antivirus warns you before running. What do you do?',
+   opts:['Allow anyway — antivirus gives false positives on legit files','Delete immediately — pirated software is the #1 malware vector','Disable antivirus temporarily to install','Run it but disconnect internet first'],
+   ans:1,exp:'Cracked software is one of the most common malware delivery methods. Attackers bundle malware in functional-looking apps. Never override this warning.'},
+  {cat:'NETWORK',q:'You set up a home Wi-Fi router. Which is most important?',
+   opts:['Use WEP — most widely compatible','Change default admin credentials and enable WPA3/WPA2','Leave defaults — manufacturers configure routers securely','Hide SSID — invisible = unattackable'],
+   ans:1,exp:'Default credentials are publicly known and the first thing attackers try. WEP is completely broken. SSID hiding provides zero real security.'},
+];
+function rQuiz(c){
+  c.innerHTML=`
+<div class="ph reveal"><span class="plbl">// 006 — ASSESSMENT</span><h1 class="pttl">Security <em>Quiz</em></h1><p class="psub">Test your cybersecurity knowledge across 10 real-world scenarios.</p></div>
+<div id="qs-lobby" class="qsec reveal">
+  <div class="qloby">
+    <span class="qlbic">📝</span>
+    <h2>Are You Cyber Smart?</h2>
+    <p>10 real-world scenarios covering phishing, passwords, malware, network security, and more. Timed, scored, with detailed explanations.</p>
+    <div class="qinfo">
+      <div class="qib"><span class="v">10</span><span class="k">Questions</span></div>
+      <div class="qib"><span class="v">30s</span><span class="k">Per Question</span></div>
+      <div class="qib"><span class="v">10pts</span><span class="k">Correct</span></div>
+      <div class="qib"><span class="v">🔥</span><span class="k">Streak Bonus</span></div>
+    </div>
+    <button class="btn-p" id="startbtn">▶ START QUIZ</button>
+  </div>
+</div>
+<div id="qs-game" class="qsec qgame">
+  <div class="qpbar"><div class="qpfill" id="qp"></div></div>
+  <div class="qtopbar">
+    <span class="qn" id="qnum">Q 1 / 10</span>
+    <span class="qs" id="qscr">Score: 0</span>
+    <span class="qt" id="qtmr">30s</span>
+  </div>
+  <div class="qcard" id="qcard"></div>
+  <div class="qfoot">
+    <span class="qstrk" id="qstrk">🔥 Streak: 0</span>
+    <button class="qnxt" id="qnxt">NEXT ▶</button>
+  </div>
+</div>
+<div id="qs-result" class="qsec qresult">
+  <div class="rring" id="rring"><span class="rsc" id="rsc">0</span><span class="rof">/ 100</span></div>
+  <div class="rgrade" id="rgrd">—</div>
+  <p class="rmsg" id="rmsg"></p>
+  <div class="rbd"><div class="rbdt">// BREAKDOWN</div><div id="rbrkd"></div></div>
+  <div class="rbtns">
+    <button class="btn-p" id="retrybtn">↻ RETRY</button>
+    <button class="btn-o" onclick="gopage('awareness')">📚 REVIEW</button>
+  </div>
+</div>`;
+  document.getElementById('startbtn').addEventListener('click',startQ);
+  document.getElementById('retrybtn').addEventListener('click',startQ);
+  document.getElementById('qnxt').addEventListener('click',nextQ);
+  if(qs&&qs.started&&!qs.finished){showQ('game');renderQ()}
+  else if(qs&&qs.finished){showQ('result');renderRes()}
+  else showQ('lobby');
+}
+function showQ(s){['lobby','game','result'].forEach(n=>{const e=document.getElementById('qs-'+n);if(e)e.classList.toggle('on',n===s)})}
+function startQ(){
+  clearInterval(qtmr);
+  qs={idx:0,score:0,streak:0,maxStreak:0,answers:[],timeLeft:30,started:true,finished:false,answered:false};
+  showQ('game');renderQ();
+}
+function renderQ(){
+  if(!qs)return;
+  clearInterval(qtmr);qs.answered=false;
+  const q=QS[qs.idx];
+  const prog=document.getElementById('qp'),num=document.getElementById('qnum'),scr=document.getElementById('qscr'),
+        card=document.getElementById('qcard'),nxt=document.getElementById('qnxt'),strk=document.getElementById('qstrk');
+  if(!card)return;
+  if(prog)prog.style.width=(qs.idx/QS.length*100)+'%';
+  if(num)num.textContent=`Q ${qs.idx+1} / ${QS.length}`;
+  if(scr)scr.textContent=`Score: ${qs.score}`;
+  if(nxt)nxt.classList.remove('on');
+  if(strk)strk.textContent=`🔥 Streak: ${qs.streak}`;
+  const eml=q.eml?`<div class="qeml"><div class="ef">From: <em>${q.eml.from}</em></div><div class="ef">Subject: <em>${q.eml.subj}</em></div><div class="es">${q.eml.body.replace(/\n/g,'<br>')}</div></div>`:'';
+  card.innerHTML=`<span class="qcat">// ${q.cat}</span><div class="qq">${q.q}</div>${eml}<div class="qopts">${q.opts.map((o,i)=>`<button class="qopt" data-i="${i}"><span class="qkey">${String.fromCharCode(65+i)}</span>${o}</button>`).join('')}</div><div class="qexp" id="qexp"><strong>// EXPLANATION</strong>${q.exp}</div>`;
+  card.querySelectorAll('.qopt').forEach(b=>b.addEventListener('click',function(){selAns(parseInt(this.dataset.i))}));
+  startTmr();
+}
+function startTmr(){
+  clearInterval(qtmr);if(!qs)return;
+  qs.timeLeft=30;
+  const te=document.getElementById('qtmr');
+  if(te){te.textContent='30s';te.className='qt'}
+  qtmr=setInterval(()=>{
+    if(!qs){clearInterval(qtmr);return}
+    qs.timeLeft--;
+    if(te){te.textContent=qs.timeLeft+'s';te.className='qt'+(qs.timeLeft<=5?' red':'')}
+    if(qs.timeLeft<=0){clearInterval(qtmr);timeUp()}
+  },1000);
+}
+function timeUp(){
+  if(!qs||qs.answered)return;
+  qs.answered=true;qs.streak=0;
+  qs.answers.push({q:qs.idx,correct:false,timedOut:true});
+  lockOpts();hilite(-1,QS[qs.idx].ans);
+  const e=document.getElementById('qexp');if(e)e.classList.add('on');
+  const n=document.getElementById('qnxt');if(n)n.classList.add('on');
+  const t=document.getElementById('qtmr');if(t){t.textContent='⏱ TIME!';t.className='qt red'}
+}
+function selAns(ch){
+  if(!qs||qs.answered)return;
+  qs.answered=true;clearInterval(qtmr);
+  const q=QS[qs.idx],ok=ch===q.ans,bonus=qs.streak>=3?5:0;
+  qs.score+=ok?10+bonus:0;
+  if(ok){qs.streak++;qs.maxStreak=Math.max(qs.maxStreak,qs.streak)}else qs.streak=0;
+  qs.answers.push({q:qs.idx,chosen:ch,correct:ok});
+  lockOpts();hilite(ch,q.ans);
+  const e=document.getElementById('qexp'),n=document.getElementById('qnxt'),s=document.getElementById('qscr'),k=document.getElementById('qstrk');
+  if(e)e.classList.add('on');if(n)n.classList.add('on');
+  if(s)s.textContent=`Score: ${qs.score}`;if(k)k.textContent=`🔥 Streak: ${qs.streak}`;
+}
+function lockOpts(){document.querySelectorAll('.qopt').forEach(o=>o.disabled=true)}
+function hilite(ch,cor){
+  document.querySelectorAll('.qopt').forEach(b=>{
+    const i=parseInt(b.dataset.i);
+    if(i===cor)b.classList.add('correct');
+    else if(i===ch&&ch!==cor)b.classList.add('wrong');
+  });
+}
+function nextQ(){
+  if(!qs)return;
+  qs.idx++;
+  if(qs.idx>=QS.length){clearInterval(qtmr);qs.finished=true;showQ('result');renderRes();return}
+  renderQ();
+}
+function renderRes(){
+  if(!qs)return;
+  const pct=qs.score/100;
+  const grades=[[.9,'🏆 EXPERT',"Outstanding cybersecurity awareness. You're a true cyber defender!"],[.7,'✅ PROFICIENT','Strong knowledge with room to grow. Review the modules you missed.'],[.5,'⚠ DEVELOPING','Foundational knowledge, but dangerous blind spots. Study the modules.'],[0,'🚨 VULNERABLE','Needs significant improvement. Please review all training modules.']];
+  const[,gr,msg]=grades.find(g=>pct>=g[0])||grades[grades.length-1];
+  const rs=document.getElementById('rsc'),rg=document.getElementById('rgrd'),rm=document.getElementById('rmsg'),rr=document.getElementById('rring'),rb=document.getElementById('rbrkd'),rp=document.getElementById('qp');
+  if(rs)rs.textContent=qs.score;if(rg)rg.textContent=gr;if(rm)rm.textContent=msg;
+  if(rr)rr.style.borderColor=pct>=.7?'var(--g)':pct>=.5?'var(--y)':'var(--r)';
+  if(rp)rp.style.width='100%';
+  if(rb)rb.innerHTML=qs.answers.map((a,i)=>`<div class="rrow"><span class="rq">${i+1}. ${QS[a.q].q.substring(0,75)}…</span><span class="rm ${a.correct?'ok':'ng'}">${a.timedOut?'⏱ TIME':a.correct?'✓ OK':'✗ WRONG'}</span></div>`).join('');
+  const rb2=document.getElementById('retrybtn');if(rb2){rb2.onclick=null;rb2.addEventListener('click',startQ)}
+}
+</script>
+</body>
+</html>
