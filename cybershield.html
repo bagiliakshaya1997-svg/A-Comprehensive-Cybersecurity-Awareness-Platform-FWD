@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>CyberShield — Cybersecurity Awareness Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#020c10;--bg2:#041820;--bg3:#071f2a;
+  --cyan:#00fff7;--cyan2:#00c8c2;--cyan3:#007a76;
+  --red:#ff3c5a;--yellow:#ffe566;--green:#39ff85;
+  --text:#c8f0ee;--text2:#7ab8b5;--text3:#3a7572;
+  --border:#0a3a38;--border2:#0f5553;
+  --card:#041c24;--card2:#061f28;
+  --font-head:'Orbitron',monospace;
+  --font-mono:'Share Tech Mono',monospace;
+  --font-body:'Exo 2',sans-serif;
+  --glow:0 0 16px #00fff740;--glow2:0 0 32px #00fff760;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font-body);overflow:hidden;}
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:var(--cyan3);border-radius:3px;}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:40px 40px;opacity:.35;pointer-events:none;z-index:0;}
+
+/* LOGIN */
+#pg-login{position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;background:var(--bg);}
+#pg-login.hidden{display:none;}
+.login-box{background:var(--card);border:1px solid var(--border2);padding:48px 40px;width:420px;max-width:95vw;border-radius:4px;position:relative;box-shadow:var(--glow2);}
+.login-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);}
+.login-logo{font-family:var(--font-head);font-size:1.7rem;font-weight:900;color:var(--cyan);text-align:center;letter-spacing:3px;margin-bottom:4px;}
+.login-logo span{color:var(--text2);font-size:.7rem;display:block;letter-spacing:6px;font-weight:400;margin-top:2px;}
+.login-sub{text-align:center;margin:12px 0 28px;font-family:var(--font-mono);font-size:.65rem;color:var(--text3);}
+.login-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:24px;}
+.ltab{flex:1;padding:10px;text-align:center;font-family:var(--font-mono);font-size:.8rem;color:var(--text3);cursor:pointer;transition:.2s;}
+.ltab.on{color:var(--cyan);border-bottom:2px solid var(--cyan);}
+.lfield{margin-bottom:16px;}
+.lfield label{display:block;font-family:var(--font-mono);font-size:.72rem;color:var(--text2);margin-bottom:6px;letter-spacing:1px;}
+.lfield input{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--font-mono);font-size:.85rem;padding:10px 14px;border-radius:2px;outline:none;transition:.2s;}
+.lfield input:focus{border-color:var(--cyan);box-shadow:var(--glow);}
+.pw-wrap{position:relative;}
+.pw-wrap input{padding-right:40px;}
+.pw-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--text3);font-size:.9rem;font-family:var(--font-mono);}
+.pw-meter{height:3px;background:var(--border);border-radius:2px;margin-top:6px;overflow:hidden;}
+.pw-bar{height:100%;width:0;border-radius:2px;transition:width .4s,background .4s;}
+.btn-main{width:100%;padding:12px;background:transparent;border:1px solid var(--cyan);color:var(--cyan);font-family:var(--font-head);font-size:.8rem;letter-spacing:2px;cursor:pointer;border-radius:2px;transition:.2s;margin-top:4px;}
+.btn-main:hover{background:var(--cyan);color:var(--bg);box-shadow:var(--glow2);}
+.login-err{font-family:var(--font-mono);font-size:.72rem;color:var(--red);margin-top:10px;min-height:16px;text-align:center;}
+
+/* APP SHELL */
+#app-shell{display:none;position:fixed;inset:0;z-index:100;}
+#app-shell.open{display:flex;}
+#sidebar{width:240px;min-width:240px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:relative;overflow:hidden;}
+#sidebar::after{content:'';position:absolute;top:0;right:0;bottom:0;width:1px;background:linear-gradient(180deg,transparent,var(--cyan3),transparent);}
+.sb-logo{padding:24px 20px 16px;border-bottom:1px solid var(--border);}
+.sb-logo-name{font-family:var(--font-head);font-size:1.1rem;font-weight:900;color:var(--cyan);letter-spacing:2px;}
+.sb-logo-sub{font-family:var(--font-mono);font-size:.6rem;color:var(--text3);letter-spacing:3px;margin-top:2px;}
+.sb-ver{font-family:var(--font-mono);font-size:.55rem;color:var(--cyan3);background:var(--bg3);border:1px solid var(--border);padding:3px 8px;border-radius:2px;margin-top:8px;display:inline-block;}
+.sb-nav{flex:1;padding:12px 0;overflow-y:auto;}
+.sb-item{display:flex;align-items:center;gap:12px;padding:11px 20px;cursor:pointer;transition:.15s;font-family:var(--font-mono);font-size:.78rem;color:var(--text2);border-left:2px solid transparent;}
+.sb-item:hover{color:var(--cyan);background:var(--bg3);}
+.sb-item.active{color:var(--cyan);background:var(--bg3);border-left-color:var(--cyan);}
+.sb-item .sb-icon{font-size:1rem;width:20px;text-align:center;}
+.sb-bottom{padding:16px 20px;border-top:1px solid var(--border);}
+.sb-user{font-family:var(--font-mono);font-size:.72rem;color:var(--text2);}
+.sb-user span{color:var(--cyan);display:block;font-size:.8rem;}
+.btn-logout{width:100%;margin-top:10px;padding:8px;background:transparent;border:1px solid var(--red);color:var(--red);font-family:var(--font-mono);font-size:.7rem;cursor:pointer;border-radius:2px;transition:.2s;letter-spacing:1px;}
+.btn-logout:hover{background:var(--red);color:#fff;}
+
+#main{flex:1;overflow-y:auto;position:relative;}
+.page{display:none;min-height:100%;}
+.page.active{display:block;}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 32px;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:50;}
+.tb-title{font-family:var(--font-head);font-size:.85rem;color:var(--cyan);letter-spacing:3px;}
+.tb-right{display:flex;align-items:center;gap:16px;}
+.tb-status{font-family:var(--font-mono);font-size:.62rem;color:var(--cyan3);border:1px solid var(--border);padding:3px 10px;border-radius:2px;}
+.tb-time{font-family:var(--font-mono);font-size:.72rem;color:var(--text3);}
+
+/* SECTION HEADER */
+.sec-head{padding:36px 32px 0;}
+.sec-head h1{font-family:var(--font-head);font-size:1.6rem;font-weight:900;color:var(--cyan);letter-spacing:2px;}
+.sec-head p{font-family:var(--font-mono);font-size:.75rem;color:var(--text2);margin-top:8px;line-height:1.6;}
+.sec-divider{height:1px;background:linear-gradient(90deg,var(--cyan3),transparent);margin:20px 32px;}
+
+/* STAT CARDS */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:0 32px 28px;}
+.stat-card{background:var(--card);border:1px solid var(--border);padding:20px;border-radius:3px;position:relative;overflow:hidden;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);}
+.stat-num{font-family:var(--font-head);font-size:1.8rem;font-weight:900;color:var(--cyan);}
+.stat-lbl{font-family:var(--font-mono);font-size:.62rem;color:var(--text3);margin-top:4px;letter-spacing:1px;}
+
+/* LIVE FEED */
+.feed-wrap{padding:0 32px 28px;}
+.feed-title{font-family:var(--font-head);font-size:.75rem;color:var(--cyan);letter-spacing:2px;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.feed-dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.feed-box{background:var(--card);border:1px solid var(--border);border-radius:3px;height:200px;overflow:hidden;position:relative;}
+.feed-item{padding:10px 16px;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:.72rem;display:flex;align-items:center;gap:10px;animation:slideIn .4s ease;}
+@keyframes slideIn{from{transform:translateX(-20px);opacity:0;}to{transform:none;opacity:1;}}
+.feed-sev{padding:2px 7px;border-radius:2px;font-size:.58rem;font-weight:700;}
+.sev-c{background:#ff3c5a20;color:var(--red);border:1px solid var(--red);}
+.sev-h{background:#ff8c0020;color:#ff8c00;border:1px solid #ff8c00;}
+.sev-m{background:#ffe56620;color:var(--yellow);border:1px solid var(--yellow);}
+
+/* SEARCH */
+.search-wrap{padding:0 32px 20px;}
+.search-inner{display:flex;gap:10px;align-items:center;}
+.search-inner input{flex:1;background:var(--card);border:1px solid var(--border);color:var(--text);font-family:var(--font-mono);font-size:.8rem;padding:10px 16px;border-radius:2px;outline:none;transition:.2s;}
+.search-inner input:focus{border-color:var(--cyan);box-shadow:var(--glow);}
+.search-inner button{padding:10px 20px;background:transparent;border:1px solid var(--cyan);color:var(--cyan);font-family:var(--font-mono);font-size:.75rem;cursor:pointer;border-radius:2px;transition:.2s;}
+.search-inner button:hover{background:var(--cyan);color:var(--bg);}
+.search-info{font-family:var(--font-mono);font-size:.6rem;color:var(--text3);margin-top:6px;}
+
+/* THREAT CARDS */
+.threats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;padding:0 32px 32px;}
+.tcard{background:var(--card);border:1px solid var(--border);border-radius:3px;overflow:hidden;transition:.2s;}
+.tcard:hover{border-color:var(--cyan3);box-shadow:var(--glow);}
+.tcard-head{padding:16px 20px;cursor:pointer;display:flex;align-items:center;gap:12px;}
+.tcard-icon{font-size:1.4rem;width:36px;text-align:center;}
+.tcard-info{flex:1;}
+.tcard-name{font-family:var(--font-head);font-size:.82rem;color:var(--cyan);letter-spacing:1px;}
+.tcard-sub{font-family:var(--font-mono);font-size:.62rem;color:var(--text3);margin-top:3px;}
+.tcard-sev{padding:3px 10px;border-radius:2px;font-family:var(--font-mono);font-size:.58rem;font-weight:700;}
+.tcard-arrow{font-family:var(--font-mono);color:var(--text3);transition:.3s;}
+.tcard.open .tcard-arrow{transform:rotate(90deg);color:var(--cyan);}
+.tcard-body{display:none;padding:0 20px 20px;border-top:1px solid var(--border);}
+.tcard.open .tcard-body{display:block;}
+.tcard-body p{font-family:var(--font-body);font-size:.8rem;color:var(--text2);line-height:1.7;margin-top:14px;}
+.tcard-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;}
+.tc-stat{background:var(--bg3);border:1px solid var(--border);padding:10px;border-radius:2px;text-align:center;}
+.tc-stat-n{font-family:var(--font-head);font-size:.95rem;color:var(--cyan);}
+.tc-stat-l{font-family:var(--font-mono);font-size:.55rem;color:var(--text3);margin-top:2px;}
+.meter-wrap{margin-top:12px;}
+.meter-label{font-family:var(--font-mono);font-size:.6rem;color:var(--text3);display:flex;justify-content:space-between;margin-bottom:4px;}
+.meter-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.meter-fill{height:100%;width:0;border-radius:2px;background:linear-gradient(90deg,var(--cyan3),var(--cyan));transition:width 1s ease;}
+
+/* AWARENESS */
+.awareness-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;padding:0 32px 32px;}
+.acard{background:var(--card);border:1px solid var(--border);border-radius:3px;overflow:hidden;}
+.acard-head{padding:16px 20px;cursor:pointer;display:flex;align-items:center;gap:12px;}
+.acard-num{font-family:var(--font-head);font-size:1rem;color:var(--cyan);width:28px;}
+.acard-title{font-family:var(--font-head);font-size:.78rem;color:var(--text);letter-spacing:1px;flex:1;}
+.acard-arrow{font-family:var(--font-mono);color:var(--text3);transition:.3s;}
+.acard.open .acard-arrow{transform:rotate(90deg);color:var(--cyan);}
+.acard-body{display:none;padding:0 20px 20px;border-top:1px solid var(--border);}
+.acard.open .acard-body{display:block;}
+.acard-body p{font-family:var(--font-body);font-size:.8rem;color:var(--text2);line-height:1.7;margin-top:14px;}
+.do-dont{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
+.do-box,.dont-box{padding:12px;border-radius:2px;}
+.do-box{background:#39ff8510;border:1px solid #39ff8540;}
+.dont-box{background:#ff3c5a10;border:1px solid #ff3c5a40;}
+.do-title{font-family:var(--font-mono);font-size:.62rem;color:var(--green);margin-bottom:6px;}
+.dont-title{font-family:var(--font-mono);font-size:.62rem;color:var(--red);margin-bottom:6px;}
+.do-box li,.dont-box li{font-family:var(--font-mono);font-size:.6rem;color:var(--text2);margin-left:14px;margin-bottom:4px;line-height:1.5;}
+
+/* PROGRESS TRACKERS */
+.tracker-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:0 32px 20px;}
+.tracker-box{background:var(--bg);border:1px solid var(--border);border-radius:2px;padding:12px 16px;}
+.tracker-title{font-family:var(--font-mono);font-size:.62rem;color:var(--cyan3);margin-bottom:10px;letter-spacing:1px;}
+.tracker-blocks{display:flex;gap:4px;flex-wrap:wrap;}
+.tracker-block{padding:4px 8px;background:var(--bg3);border:1px solid var(--cyan3);font-family:var(--font-mono);font-size:.6rem;color:var(--cyan);border-radius:2px;}
+.tracker-empty{font-family:var(--font-mono);font-size:.6rem;color:var(--text3);}
+
+/* LIVE FEED TRACKER */
+.ll-tracker{background:var(--bg);border:1px solid var(--border);border-radius:2px;padding:10px 16px;margin:0 32px 28px;}
+.ll-tracker-title{font-family:var(--font-mono);font-size:.62rem;color:var(--cyan3);margin-bottom:8px;}
+.ll-tracker-blocks{display:flex;gap:4px;flex-wrap:wrap;align-items:center;}
+.ll-block{padding:4px 8px;background:var(--bg3);border:1px solid var(--cyan3);font-family:var(--font-mono);font-size:.6rem;color:var(--cyan);border-radius:2px;}
+.ll-arrow{color:var(--text3);font-size:.7rem;font-family:var(--font-mono);}
+
+/* VISION PAGE */
+.vision-hero{padding:48px 32px 32px;text-align:center;}
+.vision-hero h1{font-family:var(--font-head);font-size:2.2rem;font-weight:900;color:var(--cyan);letter-spacing:4px;line-height:1.3;}
+.vision-hero p{font-family:var(--font-mono);font-size:.8rem;color:var(--text2);max-width:600px;margin:16px auto 0;line-height:1.8;}
+.vision-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:0 32px 32px;}
+.vision-card{background:var(--card);border:1px solid var(--border);padding:24px 20px;border-radius:3px;text-align:center;transition:.2s;}
+.vision-card:hover{border-color:var(--cyan3);transform:translateY(-4px);}
+.vc-icon{font-size:2rem;margin-bottom:12px;}
+.vc-title{font-family:var(--font-head);font-size:.78rem;color:var(--cyan);letter-spacing:2px;margin-bottom:8px;}
+.vc-text{font-family:var(--font-body);font-size:.78rem;color:var(--text2);line-height:1.6;}
+.mission-strip{background:var(--card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:28px 32px;margin-bottom:32px;}
+.mission-strip h2{font-family:var(--font-head);font-size:1rem;color:var(--cyan);letter-spacing:2px;margin-bottom:12px;}
+.mission-strip p{font-family:var(--font-body);font-size:.82rem;color:var(--text2);line-height:1.8;max-width:800px;}
+
+/* ABOUT PAGE */
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:0 32px 32px;}
+.about-card{background:var(--card);border:1px solid var(--border);padding:24px;border-radius:3px;}
+.about-card h3{font-family:var(--font-head);font-size:.85rem;color:var(--cyan);letter-spacing:2px;margin-bottom:12px;}
+.about-card p{font-family:var(--font-body);font-size:.8rem;color:var(--text2);line-height:1.7;}
+.feat-list{list-style:none;margin-top:12px;}
+.feat-list li{font-family:var(--font-mono);font-size:.7rem;color:var(--text2);padding:8px 0;border-bottom:1px solid var(--border);display:flex;gap:10px;line-height:1.5;}
+.feat-list li span{color:var(--cyan);font-weight:700;min-width:28px;}
+.team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:0 32px 32px;}
+.team-card{background:var(--card);border:1px solid var(--border);padding:20px;border-radius:3px;text-align:center;}
+.team-av{width:52px;height:52px;border-radius:50%;border:2px solid var(--cyan);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;background:var(--bg3);}
+.team-name{font-family:var(--font-head);font-size:.72rem;color:var(--cyan);letter-spacing:1px;}
+.team-role{font-family:var(--font-mono);font-size:.6rem;color:var(--text3);margin-top:4px;}
+
+/* QUIZ */
+.quiz-lobby{padding:40px 32px;text-align:center;}
+.quiz-lobby h2{font-family:var(--font-head);font-size:1.4rem;color:var(--cyan);letter-spacing:3px;margin-bottom:12px;}
+.quiz-lobby p{font-family:var(--font-mono);font-size:.75rem;color:var(--text2);line-height:1.7;max-width:500px;margin:0 auto 28px;}
+.quiz-rules{background:var(--card);border:1px solid var(--border);border-radius:3px;padding:20px;max-width:500px;margin:0 auto 28px;text-align:left;}
+.quiz-rules li{font-family:var(--font-mono);font-size:.72rem;color:var(--text2);margin-bottom:8px;padding-left:16px;position:relative;line-height:1.5;}
+.quiz-rules li::before{content:'▸';position:absolute;left:0;color:var(--cyan);}
+.btn-start-quiz{padding:14px 48px;background:transparent;border:1px solid var(--cyan);color:var(--cyan);font-family:var(--font-head);font-size:.85rem;letter-spacing:3px;cursor:pointer;border-radius:2px;transition:.2s;}
+.btn-start-quiz:hover{background:var(--cyan);color:var(--bg);box-shadow:var(--glow2);}
+.quiz-game{display:none;padding:28px 32px;}
+.quiz-game.on{display:block;}
+.quiz-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+.q-num{font-family:var(--font-mono);font-size:.75rem;color:var(--text3);}
+.q-score{font-family:var(--font-head);font-size:.85rem;color:var(--cyan);}
+.q-timer-wrap{display:flex;align-items:center;gap:8px;}
+.q-timer{font-family:var(--font-head);font-size:1.1rem;color:var(--cyan);min-width:36px;text-align:right;}
+.q-timer.warn{color:var(--red);animation:blink .5s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+.q-prog-bar{height:3px;background:var(--border);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.q-prog-fill{height:100%;background:linear-gradient(90deg,var(--cyan3),var(--cyan));transition:width .3s;}
+.q-streak{font-family:var(--font-mono);font-size:.65rem;color:var(--yellow);text-align:right;margin-bottom:12px;min-height:16px;}
+.q-question{font-family:var(--font-body);font-size:1rem;color:var(--text);line-height:1.6;margin-bottom:20px;background:var(--card);border:1px solid var(--border);padding:20px;border-radius:3px;}
+.q-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.q-opt{padding:12px 16px;background:var(--card);border:1px solid var(--border);color:var(--text);font-family:var(--font-body);font-size:.82rem;cursor:pointer;border-radius:2px;text-align:left;transition:.15s;line-height:1.4;}
+.q-opt:hover:not([disabled]){border-color:var(--cyan);color:var(--cyan);}
+.q-opt.correct{border-color:var(--green);background:#39ff8515;color:var(--green);}
+.q-opt.wrong{border-color:var(--red);background:#ff3c5a15;color:var(--red);}
+.q-exp{font-family:var(--font-mono);font-size:.7rem;color:var(--text2);background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--cyan);padding:12px 16px;border-radius:2px;line-height:1.6;display:none;}
+.q-exp.show{display:block;}
+.btn-next{margin-top:16px;padding:10px 32px;background:transparent;border:1px solid var(--cyan);color:var(--cyan);font-family:var(--font-mono);font-size:.75rem;cursor:pointer;border-radius:2px;transition:.2s;display:none;}
+.btn-next.show{display:inline-block;}
+.btn-next:hover{background:var(--cyan);color:var(--bg);}
+.q-result{display:none;padding:40px 32px;text-align:center;}
+.q-result.on{display:block;}
+.res-title{font-family:var(--font-head);font-size:1.6rem;color:var(--cyan);letter-spacing:3px;margin-bottom:8px;}
+.res-score{font-family:var(--font-head);font-size:3rem;font-weight:900;color:var(--cyan);margin:20px 0 8px;}
+.res-label{font-family:var(--font-mono);font-size:.75rem;color:var(--text3);}
+.res-breakdown{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:560px;margin:24px auto;}
+.res-box{background:var(--card);border:1px solid var(--border);padding:16px;border-radius:3px;}
+.res-box-n{font-family:var(--font-head);font-size:1.2rem;color:var(--cyan);}
+.res-box-l{font-family:var(--font-mono);font-size:.58rem;color:var(--text3);margin-top:4px;}
+.res-section-breakdown{background:var(--card);border:1px solid var(--border);border-radius:3px;padding:16px 20px;max-width:500px;margin:16px auto;font-family:var(--font-mono);font-size:.68rem;color:var(--text2);text-align:left;line-height:1.9;}
+.res-section-breakdown b{color:var(--cyan);}
+.btn-restart{margin-top:20px;padding:12px 40px;background:transparent;border:1px solid var(--cyan);color:var(--cyan);font-family:var(--font-head);font-size:.8rem;letter-spacing:2px;cursor:pointer;border-radius:2px;transition:.2s;}
+.btn-restart:hover{background:var(--cyan);color:var(--bg);}
+
+/* TICKER */
+.ticker-wrap{background:var(--bg3);border-top:1px solid var(--border);padding:6px 0;overflow:hidden;position:fixed;bottom:0;left:240px;right:0;z-index:200;}
+.ticker-inner{display:flex;gap:48px;white-space:nowrap;animation:ticker 40s linear infinite;}
+@keyframes ticker{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.ticker-item{font-family:var(--font-mono);font-size:.62rem;color:var(--text3);}
+.ticker-item span{color:var(--cyan);}
+
+@media(max-width:900px){
+  .stat-row{grid-template-columns:1fr 1fr;}
+  .threats-grid,.awareness-grid,.vision-cards,.about-grid,.team-grid,.tracker-row{grid-template-columns:1fr;}
+  .q-opts{grid-template-columns:1fr;}
+  .res-breakdown{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="pg-login">
+  <div class="login-box">
+    <div class="login-logo">CyberShield<span>CYBERSECURITY AWARENESS PLATFORM</span></div>
+    <div class="login-sub">Protecting the digital frontier — one awareness step at a time.</div>
+    <div class="login-tabs">
+      <div class="ltab on" id="tab-login" onclick="switchTab('login')">LOGIN</div>
+      <div class="ltab" id="tab-reg" onclick="switchTab('reg')">REGISTER</div>
+    </div>
+    <div id="form-login">
+      <div class="lfield"><label>EMAIL ADDRESS</label><input type="email" id="l-email" placeholder="user@example.com"/></div>
+      <div class="lfield">
+        <label>PASSWORD</label>
+        <div class="pw-wrap"><input type="password" id="l-pass" placeholder="••••••••"/><span class="pw-eye" onclick="togglePw('l-pass',this)">👁</span></div>
+      </div>
+      <button class="btn-main" onclick="doLogin()">ACCESS SYSTEM</button>
+      <div class="login-err" id="l-err"></div>
+    </div>
+    <div id="form-reg" style="display:none;">
+      <div class="lfield"><label>FULL NAME</label><input type="text" id="r-name" placeholder="Your name"/></div>
+      <div class="lfield"><label>EMAIL ADDRESS</label><input type="email" id="r-email" placeholder="user@example.com"/></div>
+      <div class="lfield">
+        <label>PASSWORD</label>
+        <div class="pw-wrap"><input type="password" id="r-pass" placeholder="••••••••" oninput="updateMeter(this)"/><span class="pw-eye" onclick="togglePw('r-pass',this)">👁</span></div>
+        <div class="pw-meter"><div class="pw-bar" id="pw-bar"></div></div>
+      </div>
+      <button class="btn-main" onclick="doRegister()">CREATE ACCOUNT</button>
+      <div class="login-err" id="r-err"></div>
+    </div>
+  </div>
+</div>
+
+<!-- APP SHELL -->
+<div id="app-shell">
+  <div id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-name">⚔ CyberShield</div>
+      <div class="sb-logo-sub">SECURITY PLATFORM</div>
+      <div class="sb-ver">v3.0 · Advanced Edition</div>
+    </div>
+    <div class="sb-nav">
+      <div class="sb-item" id="sb-vision" onclick="goPage('vision')"><span class="sb-icon">🔭</span>Vision</div>
+      <div class="sb-item" id="sb-about" onclick="goPage('about')"><span class="sb-icon">ℹ</span>About</div>
+      <div class="sb-item" id="sb-home" onclick="goPage('home')"><span class="sb-icon">🏠</span>Home</div>
+      <div class="sb-item" id="sb-threats" onclick="goPage('threats')"><span class="sb-icon">⚠</span>Threats</div>
+      <div class="sb-item" id="sb-awareness" onclick="goPage('awareness')"><span class="sb-icon">🛡</span>Awareness</div>
+      <div class="sb-item" id="sb-quiz" onclick="goPage('quiz')"><span class="sb-icon">📝</span>Quiz</div>
+    </div>
+    <div class="sb-bottom">
+      <div class="sb-user">Logged in as<span id="sb-username">—</span></div>
+      <button class="btn-logout" onclick="doLogout()">⏻ LOGOUT</button>
+    </div>
+  </div>
+
+  <div id="main">
+
+    <!-- VISION PAGE -->
+    <div class="page" id="pg-vision">
+      <div class="topbar"><span class="tb-title">VISION</span><div class="tb-right"><span class="tb-status">● SYSTEM ACTIVE</span><span class="tb-time" id="clk-v"></span></div></div>
+      <div class="vision-hero">
+        <h1>SECURE THE DIGITAL<br/>FRONTIER</h1>
+        <p>CyberShield is a next-generation cybersecurity awareness platform built to educate, train, and empower individuals and organisations against modern digital threats. Every feature is engineered for maximum awareness and rapid threat response.</p>
+      </div>
+      <div class="sec-divider"></div>
+      <div class="vision-cards">
+        <div class="vision-card">
+          <div class="vc-icon">🔍</div>
+          <div class="vc-title">THREAT INTELLIGENCE</div>
+          <div class="vc-text">Real-time threat monitoring with live attack feeds updating continuously. Threats are automatically ranked by severity so you always see what matters most first.</div>
+        </div>
+        <div class="vision-card">
+          <div class="vc-icon">🛡</div>
+          <div class="vc-title">ADAPTIVE AWARENESS</div>
+          <div class="vc-text">Six comprehensive training modules covering the most critical cybersecurity topics. Track your progress and build stronger security habits through guided learning.</div>
+        </div>
+        <div class="vision-card">
+          <div class="vc-icon">⚡</div>
+          <div class="vc-title">INSTANT LOOKUP</div>
+          <div class="vc-text">Search our entire threat database in milliseconds. Fast, intelligent search finds relevant threats, attack patterns, and countermeasures immediately.</div>
+        </div>
+        <div class="vision-card">
+          <div class="vc-icon">📊</div>
+          <div class="vc-title">SMART QUIZ ENGINE</div>
+          <div class="vc-text">25 scenario-based questions that test your real-world cybersecurity knowledge. Timed challenges with streak bonuses and detailed per-section breakdowns.</div>
+        </div>
+        <div class="vision-card">
+          <div class="vc-icon">🔐</div>
+          <div class="vc-title">PERFORMANCE FIRST</div>
+          <div class="vc-text">Every operation on this platform is optimised for speed and reliability. From user authentication to threat ranking, CyberShield is built for enterprise-grade performance.</div>
+        </div>
+        <div class="vision-card">
+          <div class="vc-icon">🔗</div>
+          <div class="vc-title">CONNECTED LEARNING</div>
+          <div class="vc-text">Navigate seamlessly between threat research, awareness training, and assessments. Your learning journey is connected, contextual, and continuous.</div>
+        </div>
+      </div>
+      <div class="mission-strip">
+        <h2>OUR MISSION</h2>
+        <p>To bridge the gap between technical cybersecurity and everyday awareness. CyberShield transforms complex threat intelligence into actionable knowledge — empowering every user to recognise, resist, and report digital attacks before they cause harm.</p>
+      </div>
+    </div>
+
+    <!-- ABOUT PAGE -->
+    <div class="page" id="pg-about">
+      <div class="topbar"><span class="tb-title">ABOUT</span><div class="tb-right"><span class="tb-status">● SYSTEM ACTIVE</span><span class="tb-time" id="clk-a"></span></div></div>
+      <div class="sec-head"><h1>ABOUT CYBERSHIELD</h1><p>A comprehensive cybersecurity awareness platform built for education, training, and threat intelligence.</p></div>
+      <div class="sec-divider"></div>
+      <div class="about-grid">
+        <div class="about-card">
+          <h3>PLATFORM FEATURES</h3>
+          <ul class="feat-list">
+            <li><span>01</span>Real-time live attack feed with severity classification — Critical, High, and Medium threats tracked continuously.</li>
+            <li><span>02</span>Comprehensive threat library with 6 major attack categories, detailed statistics, impact metrics, and lifecycle analysis.</li>
+            <li><span>03</span>Six awareness training modules with practical Do/Don't guides, progress tracking, and completion status.</li>
+            <li><span>04</span>25-question timed cybersecurity quiz with streak bonuses, instant feedback, and detailed score breakdowns.</li>
+          </ul>
+        </div>
+        <div class="about-card">
+          <h3>PLATFORM ARCHITECTURE</h3>
+          <p>CyberShield is a pure frontend single-page application built with HTML5, CSS3, and Vanilla JavaScript — delivering a lightweight, fast, and dependency-free experience that runs entirely in your browser.</p>
+          <p style="margin-top:12px;">The platform features session-based authentication, intelligent threat search, dynamic live feeds, animated statistics, and a fully interactive quiz engine — all without any external frameworks or backend servers.</p>
+          <p style="margin-top:12px;">Security-first design principles guide every feature, from password strength validation on registration to secure session management throughout your experience.</p>
+        </div>
+      </div>
+      <div class="sec-head" style="padding-top:8px;"><h1>TEAM</h1></div>
+      <div class="sec-divider"></div>
+      <div class="team-grid">
+        <div class="team-card"><div class="team-av">👨‍💻</div><div class="team-name">ALEX CHEN</div><div class="team-role">Lead Developer & Architect</div></div>
+        <div class="team-card"><div class="team-av">👩‍🔬</div><div class="team-name">SARA PATEL</div><div class="team-role">Security Researcher</div></div>
+        <div class="team-card"><div class="team-av">👨‍🎨</div><div class="team-name">JAMES KIM</div><div class="team-role">UI/UX Designer</div></div>
+        <div class="team-card"><div class="team-av">👩‍💼</div><div class="team-name">PRIYA SHARMA</div><div class="team-role">Content Strategist</div></div>
+        <div class="team-card"><div class="team-av">👨‍🏫</div><div class="team-name">DR. RAVI NAIR</div><div class="team-role">Security Advisor & Professor</div></div>
+        <div class="team-card"><div class="team-av">👩‍💻</div><div class="team-name">LUNA TORRES</div><div class="team-role">Backend Integration</div></div>
+      </div>
+    </div>
+
+    <!-- HOME PAGE -->
+    <div class="page" id="pg-home">
+      <div class="topbar"><span class="tb-title">DASHBOARD</span><div class="tb-right"><span class="tb-status">● LIVE MONITORING</span><span class="tb-time" id="clk-h"></span></div></div>
+      <div class="sec-head"><h1>SECURITY DASHBOARD</h1><p>Live global threat monitoring. New attack events update in real time. Statistics reflect current global cybersecurity landscape.</p></div>
+      <div class="sec-divider"></div>
+      <div class="stat-row">
+        <div class="stat-card"><div class="stat-num" data-target="2847193">0</div><div class="stat-lbl">ATTACKS DETECTED</div></div>
+        <div class="stat-card"><div class="stat-num" data-target="98">0</div><div class="stat-lbl">THREATS BLOCKED %</div></div>
+        <div class="stat-card"><div class="stat-num" data-target="147">0</div><div class="stat-lbl">NATIONS MONITORED</div></div>
+        <div class="stat-card"><div class="stat-num" data-target="6">0</div><div class="stat-lbl">THREAT CATEGORIES</div></div>
+      </div>
+      <div class="feed-wrap">
+        <div class="feed-title"><span class="feed-dot"></span>LIVE ATTACK FEED</div>
+        <div class="feed-box" id="feed-box"></div>
+      </div>
+      <div class="ll-tracker">
+        <div class="ll-tracker-title">RECENT EVENT CHAIN</div>
+        <div class="ll-tracker-blocks" id="ll-blocks"></div>
+      </div>
+    </div>
+
+    <!-- THREATS PAGE -->
+    <div class="page" id="pg-threats">
+      <div class="topbar"><span class="tb-title">THREAT LIBRARY</span><div class="tb-right"><span class="tb-status">● 6 THREATS RANKED</span><span class="tb-time" id="clk-t"></span></div></div>
+      <div class="sec-head"><h1>THREAT LIBRARY</h1><p>Six major cybersecurity threat categories ranked by severity. Click any threat to expand detailed analysis, real-world statistics, and countermeasures.</p></div>
+      <div class="sec-divider"></div>
+      <div class="search-wrap">
+        <div class="search-inner">
+          <input type="text" id="threat-search" placeholder="Search threats by name or keyword..."/>
+          <button onclick="searchThreats()">🔍 SEARCH</button>
+        </div>
+        <div class="search-info" id="search-info">Threats displayed in order of severity: Critical → High → Medium</div>
+      </div>
+      <div class="threats-grid" id="threats-grid"></div>
+    </div>
+
+    <!-- AWARENESS PAGE -->
+    <div class="page" id="pg-awareness">
+      <div class="topbar"><span class="tb-title">AWARENESS TRAINING</span><div class="tb-right"><span class="tb-status">● 6 MODULES</span><span class="tb-time" id="clk-aw"></span></div></div>
+      <div class="sec-head"><h1>AWARENESS TRAINING</h1><p>Six essential cybersecurity training modules. Click each module to expand practical guidance, best practices, and real-world tips.</p></div>
+      <div class="sec-divider"></div>
+      <div class="tracker-row">
+        <div class="tracker-box">
+          <div class="tracker-title">COMPLETED MODULES</div>
+          <div class="tracker-blocks" id="stack-viz"><span class="tracker-empty">Open a module to begin</span></div>
+        </div>
+        <div class="tracker-box">
+          <div class="tracker-title">PENDING MODULES</div>
+          <div class="tracker-blocks" id="queue-viz"></div>
+        </div>
+      </div>
+      <div class="awareness-grid" id="awareness-grid"></div>
+    </div>
+
+    <!-- QUIZ PAGE -->
+    <div class="page" id="pg-quiz">
+      <div class="topbar"><span class="tb-title">SECURITY QUIZ</span><div class="tb-right"><span class="tb-status">● 25 QUESTIONS</span><span class="tb-time" id="clk-q"></span></div></div>
+      <div class="quiz-lobby" id="quiz-lobby">
+        <h2>CYBERSECURITY QUIZ</h2>
+        <p>Test your cybersecurity knowledge with 25 scenario-based questions. Topics are randomised each attempt. Answer quickly for maximum score.</p>
+        <ul class="quiz-rules">
+          <li>25 questions covering all major cybersecurity topics</li>
+          <li>20 seconds per question — timer counts down automatically</li>
+          <li>Instant feedback with explanations after each answer</li>
+          <li>Streak bonus: 3 correct answers in a row = +5 bonus points</li>
+          <li>Score breakdown by topic section shown at the end</li>
+          <li>Final grade assigned based on your total score</li>
+        </ul>
+        <button class="btn-start-quiz" onclick="startQuiz()">▶ START QUIZ</button>
+      </div>
+      <div class="quiz-game" id="quiz-game">
+        <div class="quiz-top">
+          <span class="q-num" id="q-num">Q 1 / 25</span>
+          <span class="q-score" id="q-score">Score: 0</span>
+          <div class="q-timer-wrap"><span style="font-family:var(--font-mono);font-size:.7rem;color:var(--text3);">⏱</span><span class="q-timer" id="q-timer">20</span></div>
+        </div>
+        <div class="q-prog-bar"><div class="q-prog-fill" id="q-prog"></div></div>
+        <div class="q-streak" id="q-streak"></div>
+        <div class="q-question" id="q-question"><div id="q-text"></div></div>
+        <div class="q-opts" id="q-opts"></div>
+        <div class="q-exp" id="q-exp"></div>
+        <button class="btn-next" id="btn-next" onclick="nextQ()">NEXT ▶</button>
+      </div>
+      <div class="q-result" id="q-result">
+        <div class="res-title">QUIZ COMPLETE</div>
+        <div class="res-score" id="res-score-n">0</div>
+        <div class="res-label">POINTS SCORED</div>
+        <div class="res-breakdown">
+          <div class="res-box"><div class="res-box-n" id="rb-correct">0</div><div class="res-box-l">CORRECT</div></div>
+          <div class="res-box"><div class="res-box-n" id="rb-wrong">0</div><div class="res-box-l">WRONG</div></div>
+          <div class="res-box"><div class="res-box-n" id="rb-streak">0</div><div class="res-box-l">BEST STREAK</div></div>
+          <div class="res-box"><div class="res-box-n" id="rb-bonus">0</div><div class="res-box-l">BONUS PTS</div></div>
+        </div>
+        <div class="res-section-breakdown" id="res-section-breakdown"></div>
+        <div style="font-family:var(--font-mono);font-size:.85rem;margin-top:16px;" id="res-grade"></div>
+        <button class="btn-restart" onclick="restartQuiz()">↺ TRY AGAIN</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TICKER -->
+<div class="ticker-wrap" id="ticker-wrap" style="display:none;">
+  <div class="ticker-inner">
+    <span class="ticker-item">⚠ <span>ALERT:</span> Ransomware attacks increased 67% in 2024 — ensure all backups are encrypted and offline</span>
+    <span class="ticker-item">🔐 <span>TIP:</span> Use multi-factor authentication on all critical accounts — it blocks 99% of automated attacks</span>
+    <span class="ticker-item">⚠ <span>ALERT:</span> Phishing remains the #1 attack vector — verify sender domains before clicking any link</span>
+    <span class="ticker-item">🛡 <span>TIP:</span> Patch your systems within 48 hours of a critical CVE release to close exploit windows</span>
+    <span class="ticker-item">⚠ <span>ALERT:</span> Zero-day exploits are sold for up to $2.5M on dark web markets — keep systems updated</span>
+    <span class="ticker-item">🔐 <span>TIP:</span> Never reuse passwords — a single compromised credential can expose all your accounts</span>
+    <span class="ticker-item">⚠ <span>ALERT:</span> DDoS attacks now average 800 Gbps — ensure your infrastructure has mitigation in place</span>
+    <span class="ticker-item">🛡 <span>TIP:</span> Insider threats account for 60% of security incidents — enforce least-privilege access controls</span>
+    <span class="ticker-item">⚠ <span>ALERT:</span> Ransomware attacks increased 67% in 2024 — ensure all backups are encrypted and offline</span>
+    <span class="ticker-item">🔐 <span>TIP:</span> Use multi-factor authentication on all critical accounts — it blocks 99% of automated attacks</span>
+    <span class="ticker-item">⚠ <span>ALERT:</span> Phishing remains the #1 attack vector — verify sender domains before clicking any link</span>
+    <span class="ticker-item">🛡 <span>TIP:</span> Patch your systems within 48 hours of a critical CVE release to close exploit windows</span>
+    <span class="ticker-item">⚠ <span>ALERT:</span> Zero-day exploits are sold for up to $2.5M on dark web markets — keep systems updated</span>
+    <span class="ticker-item">🔐 <span>TIP:</span> Never reuse passwords — a single compromised credential can expose all your accounts</span>
+    <span class="ticker-item">⚠ <span>ALERT:</span> DDoS attacks now average 800 Gbps — ensure your infrastructure has mitigation in place</span>
+    <span class="ticker-item">🛡 <span>TIP:</span> Insider threats account for 60% of security incidents — enforce least-privilege access controls</span>
+  </div>
+</div>
+
+<script>
+
+// ============================================================
+// CO1: Algorithm Analysis — Asymptotic Notation (Big-O, Ω, Θ)
+// Empirical measurements of time and space complexity
+// Comparing alternative solutions for searching and sorting
+// ============================================================
+
+// ============================================================
+// CO2: Abstract Data Types (ADTs) using Arrays and Linked Lists
+// Singly Linked List — stores the live attack feed events
+// Operations used: insert (prepend), delete (removeTail), traverse (toArray)
+// Time Complexity: prepend O(1), removeTail O(n), traverse O(n)
+// Space Complexity: O(n) where n = number of nodes
+// ============================================================
+class LLNode {
+  // CO2: Node class for Singly Linked List ADT
+  // Each node holds a value and a reference to the next node
+  constructor(v) { this.val = v; this.next = null; }
+}
+
+class LinkedList {
+  // CO2: Singly Linked List — used to maintain the live attack feed
+  // Supports: insert at head (prepend), delete tail (removeTail), traverse
+  // Reason chosen over array: O(1) head insertion for live feed prepend
+  constructor() { this.head = null; this.size = 0; }
+
+  // CO2: prepend — Insert at head | Time: O(1) | Space: O(1)
+  prepend(v) {
+    const n = new LLNode(v);
+    n.next = this.head;
+    this.head = n;
+    this.size++;
+    // Keep max 8 nodes — remove tail when limit exceeded
+    if (this.size > 8) this.removeTail();
+  }
+
+  // CO2: removeTail — Delete last node | Time: O(n) | Space: O(1)
+  removeTail() {
+    if (!this.head) return;
+    if (!this.head.next) { this.head = null; this.size--; return; }
+    let c = this.head;
+    while (c.next && c.next.next) c = c.next;
+    c.next = null;
+    this.size--;
+  }
+
+  // CO2: toArray — Traverse all nodes | Time: O(n) | Space: O(n)
+  toArray() {
+    const a = [];
+    let c = this.head;
+    while (c) { a.push(c.val); c = c.next; }
+    return a;
+  }
+}
+
+// ============================================================
+// CO3: Stack ADT — Array-based implementation
+// Used to track completed awareness modules (LIFO order)
+// Operations: push O(1), pop O(1), toArray O(n)
+// CO3: Stacks model real-world workflows — last module opened
+//      is shown first in the "Completed" tracker
+// ============================================================
+class Stack {
+  constructor() { this.items = []; }
+
+  // CO3: push — Add to top of stack | Time: O(1)
+  push(v) { this.items.push(v); }
+
+  // CO3: pop — Remove from top of stack | Time: O(1)
+  pop() { return this.items.pop(); }
+
+  // CO3: toArray — View all items (most recent first) | Time: O(n)
+  toArray() { return [...this.items].reverse(); }
+}
+
+// ============================================================
+// CO3: Queue ADT — Array-based implementation
+// Used to track pending awareness modules (FIFO order)
+// Operations: enqueue O(1), dequeue O(n) [shift], toArray O(n)
+// CO3: Queue models a real-world workflow — modules are
+//      processed in the order they were assigned (FIFO)
+// ============================================================
+class Queue {
+  constructor() { this.items = []; }
+
+  // CO3: enqueue — Add to rear of queue | Time: O(1)
+  enqueue(v) { this.items.push(v); }
+
+  // CO3: dequeue — Remove from front | Time: O(n) using array shift
+  dequeue() { return this.items.shift(); }
+
+  // CO3: toArray — View all pending items | Time: O(n)
+  toArray() { return [...this.items]; }
+}
+
+// ============================================================
+// CO4: Hash Table (Hash Map) with Chaining (Separate Chaining)
+// Used for O(1) average-case user lookup and quiz score storage
+// Hash function: polynomial rolling hash (base 31)
+// Collision resolution: Separate Chaining (array of buckets)
+// CO4: Leverages Map-like structure — O(1) get/set average case
+// ============================================================
+class HashTable {
+  // CO4: Hash Table with chaining — size 16 or 32 buckets
+  constructor(size = 16) {
+    this.table = new Array(size).fill(null).map(() => []);
+    this.size = size;
+  }
+
+  // CO4: hash — Polynomial rolling hash function | Time: O(k) where k = key length
+  hash(k) {
+    let h = 0;
+    for (let i = 0; i < k.length; i++) h = (h * 31 + k.charCodeAt(i)) % this.size;
+    return h;
+  }
+
+  // CO4: set — Insert or update key-value pair | Time: O(1) average, O(n) worst
+  set(k, v) {
+    const i = this.hash(k);
+    const b = this.table[i];
+    const ex = b.find(e => e[0] === k);
+    if (ex) ex[1] = v; else b.push([k, v]);
+  }
+
+  // CO4: get — Retrieve value by key | Time: O(1) average, O(n) worst
+  get(k) {
+    const i = this.hash(k);
+    return (this.table[i].find(e => e[0] === k) || [null, null])[1];
+  }
+
+  // CO4: has — Check key existence | Time: O(1) average
+  has(k) { return this.get(k) !== null; }
+}
+
+// ============================================================
+// CO1: Quick Sort — Divide and Conquer sorting algorithm
+// Used to rank threats by severity (Critical > High > Medium)
+// Time Complexity: O(n log n) average, O(n²) worst case
+// Space Complexity: O(log n) call stack (recursive)
+// CO1: Justified choice — Quick Sort is optimal for in-memory
+//      sorting of small datasets (6 threats) with numeric keys
+// ============================================================
+function quickSort(arr, key) {
+  // CO1: Base case — array of 0 or 1 elements is already sorted
+  if (arr.length <= 1) return arr;
+  const pivot = arr[arr.length - 1];
+  // CO1: Partition step — elements >= pivot go left (descending order)
+  const left = arr.slice(0, -1).filter(x => x[key] >= pivot[key]);
+  const right = arr.slice(0, -1).filter(x => x[key] < pivot[key]);
+  // CO1: Recursive calls — T(n) = 2T(n/2) + O(n) → O(n log n)
+  return [...quickSort(left, key), pivot, ...quickSort(right, key)];
+}
+
+// ============================================================
+// CO1: Binary Search — Efficient search on sorted arrays
+// Used to search threat names in the threat library
+// Time Complexity: O(log n) — halves search space each step
+// Space Complexity: O(1) — iterative implementation
+// CO1: Binary Search vs Linear Search:
+//      Linear Search: O(n) | Binary Search: O(log n)
+//      For sorted threat names array, Binary Search is optimal
+// ============================================================
+function binarySearch(arr, target) {
+  let lo = 0, hi = arr.length - 1;
+  while (lo <= hi) {
+    const mid = Math.floor((lo + hi) / 2);
+    // CO1: Compare midpoint to target — O(1) per iteration
+    if (arr[mid].toLowerCase() === target.toLowerCase()) return mid;
+    else if (arr[mid].toLowerCase() < target.toLowerCase()) lo = mid + 1;
+    else hi = mid - 1;
+  }
+  return -1; // Not found
+}
+
+// ============================================================
+// CO1: Fisher-Yates Shuffle — O(n) randomisation algorithm
+// Used to randomise quiz question order each attempt
+// Time Complexity: O(n) | Space Complexity: O(n) for copy
+// ============================================================
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    // CO1: Swap current element with a random earlier element
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ============================================================
+// CO4: Hash Table instance for user authentication store
+// Stores user credentials — O(1) average lookup by email key
+// ============================================================
+const userStore = new HashTable(32); // CO4: 32 buckets for user data
+let currentUser = null;
+
+// ── AUTH ──
+function switchTab(t) {
+  document.getElementById('tab-login').classList.toggle('on', t === 'login');
+  document.getElementById('tab-reg').classList.toggle('on', t === 'reg');
+  document.getElementById('form-login').style.display = t === 'login' ? 'block' : 'none';
+  document.getElementById('form-reg').style.display = t === 'reg' ? 'block' : 'none';
+}
+
+function togglePw(id, el) {
+  const i = document.getElementById(id);
+  i.type = i.type === 'password' ? 'text' : 'password';
+  el.textContent = i.type === 'password' ? '👁' : '🙈';
+}
+
+function updateMeter(inp) {
+  const v = inp.value, bar = document.getElementById('pw-bar');
+  let s = 0;
+  if (v.length >= 8) s++; if (/[A-Z]/.test(v)) s++; if (/[0-9]/.test(v)) s++;
+  if (/[^A-Za-z0-9]/.test(v)) s++; if (v.length >= 14) s++;
+  const cols = ['#ff3c5a', '#ff8c00', '#ffe566', '#39ff85', '#00fff7'];
+  const ws = ['20%', '40%', '60%', '80%', '100%'];
+  bar.style.width = ws[s - 1] || '0%';
+  bar.style.background = cols[s - 1] || 'transparent';
+}
+
+function doLogin() {
+  const e = document.getElementById('l-email').value.trim();
+  const p = document.getElementById('l-pass').value;
+  const err = document.getElementById('l-err');
+  if (!e || !p) { err.textContent = '⚠ Fill all fields'; return; }
+  if (!/\S+@\S+\.\S+/.test(e)) { err.textContent = '⚠ Invalid email'; return; }
+  // CO4: Hash Table get — O(1) average lookup by email key
+  const stored = userStore.get(e);
+  if (stored) {
+    if (stored.pass !== p) { err.textContent = '⚠ Wrong password'; return; }
+    loginSuccess(stored.name, e);
+  } else {
+    // CO4: Hash Table set — O(1) average insert for new user
+    userStore.set(e, { name: e.split('@')[0], pass: p });
+    loginSuccess(e.split('@')[0], e);
+  }
+}
+
+function doRegister() {
+  const n = document.getElementById('r-name').value.trim();
+  const e = document.getElementById('r-email').value.trim();
+  const p = document.getElementById('r-pass').value;
+  const err = document.getElementById('r-err');
+  if (!n || !e || !p) { err.textContent = '⚠ Fill all fields'; return; }
+  if (!/\S+@\S+\.\S+/.test(e)) { err.textContent = '⚠ Invalid email'; return; }
+  if (p.length < 6) { err.textContent = '⚠ Password too short'; return; }
+  // CO4: Hash Table has — O(1) average check for existing user
+  if (userStore.has(e)) { err.textContent = '⚠ Account exists. Please login.'; return; }
+  // CO4: Hash Table set — O(1) average insert new registered user
+  userStore.set(e, { name: n, pass: p });
+  loginSuccess(n, e);
+}
+
+function loginSuccess(name, email) {
+  currentUser = { name, email };
+  sessionStorage.setItem('cs_user', JSON.stringify(currentUser));
+  document.getElementById('sb-username').textContent = name;
+  document.getElementById('pg-login').classList.add('hidden');
+  document.getElementById('app-shell').classList.add('open');
+  document.getElementById('ticker-wrap').style.display = 'block';
+  goPage('home');
+  startClock(); startFeed(); animateCounters(); renderThreats(); renderAwareness();
+}
+
+function doLogout() {
+  sessionStorage.removeItem('cs_user');
+  currentUser = null;
+  clearInterval(feedTimer); clearInterval(quizTimer); clearInterval(clockTimer);
+  document.getElementById('pg-login').classList.remove('hidden');
+  document.getElementById('app-shell').classList.remove('open');
+  document.getElementById('ticker-wrap').style.display = 'none';
+  document.getElementById('quiz-lobby').style.display = 'block';
+  document.getElementById('quiz-game').classList.remove('on');
+  document.getElementById('q-result').classList.remove('on');
+}
+
+// ── NAVIGATION ──
+let currentPage = '';
+function goPage(pg) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+  document.getElementById('pg-' + pg).classList.add('active');
+  const sb = document.getElementById('sb-' + pg);
+  if (sb) sb.classList.add('active');
+  currentPage = pg;
+  if (pg !== 'quiz') clearInterval(quizTimer);
+  if (pg === 'quiz') {
+    document.getElementById('quiz-lobby').style.display = 'block';
+    document.getElementById('quiz-game').classList.remove('on');
+    document.getElementById('q-result').classList.remove('on');
+  }
+  document.getElementById('main').scrollTop = 0;
+}
+
+// ── CLOCK ──
+let clockTimer;
+function startClock() {
+  const ids = ['clk-v', 'clk-a', 'clk-h', 'clk-t', 'clk-aw', 'clk-q'];
+  function tick() {
+    const t = new Date().toLocaleTimeString();
+    ids.forEach(id => { const el = document.getElementById(id); if (el) el.textContent = t; });
+  }
+  tick();
+  clockTimer = setInterval(tick, 1000);
+}
+
+// ============================================================
+// CO2: Singly Linked List instance — feedLL
+// Live attack feed uses Linked List for O(1) prepend insertion
+// Each new event is inserted at the HEAD of the list
+// Old events fall off the TAIL when size exceeds 8 nodes
+// Trade-off vs Array: Faster head insert, but no random access
+// ============================================================
+const feedLL = new LinkedList(); // CO2: Singly Linked List for feed events
+
+const feedEvents = [
+  { sev: 'CRITICAL', sevC: 'sev-c', msg: 'Ransomware payload detected — Hospital network, Mumbai' },
+  { sev: 'HIGH',     sevC: 'sev-h', msg: 'SQL Injection attempt — E-commerce portal login page' },
+  { sev: 'CRITICAL', sevC: 'sev-c', msg: 'Zero-day exploit — Windows kernel privilege escalation' },
+  { sev: 'MEDIUM',   sevC: 'sev-m', msg: 'Phishing campaign — 2,300 malicious emails blocked' },
+  { sev: 'HIGH',     sevC: 'sev-h', msg: 'DDoS attack — 850 Gbps flood targeting financial API' },
+  { sev: 'CRITICAL', sevC: 'sev-c', msg: 'APT group — Lateral movement detected in government network' },
+  { sev: 'HIGH',     sevC: 'sev-h', msg: 'Credential stuffing — 45,000 login attempts blocked' },
+  { sev: 'MEDIUM',   sevC: 'sev-m', msg: 'Insider threat — Unusual data exfiltration pattern detected' },
+  { sev: 'HIGH',     sevC: 'sev-h', msg: 'Man-in-the-Middle — SSL stripping on public WiFi network' },
+  { sev: 'CRITICAL', sevC: 'sev-c', msg: 'Supply chain attack — Malicious package detected in repository' },
+];
+
+let feedIdx = 0, feedTimer;
+
+function startFeed() {
+  // CO2: Prepend first 3 events to Linked List — O(1) each
+  for (let i = 0; i < 3; i++) { feedLL.prepend(feedEvents[i]); feedIdx++; }
+  renderFeed();
+  renderLLViz();
+  feedTimer = setInterval(() => {
+    if (currentPage !== 'home') return;
+    // CO2: O(1) prepend — new event added at head of linked list
+    feedLL.prepend(feedEvents[feedIdx % feedEvents.length]);
+    feedIdx++;
+    renderFeed();
+    renderLLViz();
+  }, 3500);
+}
+
+function renderFeed() {
+  const box = document.getElementById('feed-box');
+  box.innerHTML = '';
+  // CO2: toArray traverses Linked List O(n) — shows top 5 nodes
+  feedLL.toArray().slice(0, 5).forEach(ev => {
+    const d = document.createElement('div');
+    d.className = 'feed-item';
+    d.innerHTML = `<span class="feed-sev ${ev.sevC}">${ev.sev}</span><span style="flex:1;color:var(--text2);font-size:.7rem;">${ev.msg}</span><span style="color:var(--text3);font-size:.6rem;">${new Date().toLocaleTimeString()}</span>`;
+    box.appendChild(d);
+  });
+}
+
+function renderLLViz() {
+  // CO2: Visualises the Linked List as connected blocks with arrows
+  // Shows each node's value and the → pointer to the next node
+  const blocks = document.getElementById('ll-blocks');
+  if (!blocks) return;
+  blocks.innerHTML = '';
+  const arr = feedLL.toArray(); // CO2: O(n) traversal
+  arr.forEach((ev, i) => {
+    const b = document.createElement('span');
+    b.className = 'll-block';
+    b.textContent = ev.sev;
+    blocks.appendChild(b);
+    if (i < arr.length - 1) {
+      // CO2: Arrow represents the .next pointer between linked list nodes
+      const arrow = document.createElement('span');
+      arrow.className = 'll-arrow';
+      arrow.textContent = '→';
+      blocks.appendChild(arrow);
+    }
+  });
+}
+
+// ── ANIMATED COUNTERS ──
+function animateCounters() {
+  document.querySelectorAll('[data-target]').forEach(el => {
+    if (el.classList.contains('counted')) return;
+    el.classList.add('counted');
+    const target = +el.dataset.target;
+    let cur = 0;
+    const step = Math.ceil(target / 60);
+    const t = setInterval(() => {
+      cur = Math.min(cur + step, target);
+      el.textContent = target > 999 ? cur.toLocaleString() : cur;
+      if (cur >= target) clearInterval(t);
+    }, 25);
+  });
+}
+
+// ============================================================
+// CO1: Threat data — sorted using Quick Sort by severity (CO1)
+// RAW_THREATS unsorted → quickSort(sevN descending) → THREATS
+// CO1: Quick Sort chosen for O(n log n) average performance
+// CO1: Binary Search applied on sorted THREAT_NAMES_SORTED array
+// ============================================================
+const RAW_THREATS = [
+  {
+    name: 'Ransomware', icon: '🔒', sev: 'CRITICAL', sevN: 3, sevC: 'sev-c',
+    desc: 'Ransomware encrypts victim files and demands cryptocurrency payment for decryption keys. Modern variants use hybrid encryption (RSA + AES) making brute-force decryption practically impossible without the attacker\'s private key.',
+    stats: [{ n: '$4.54M', l: 'Avg Cost' }, { n: '20 Days', l: 'Recovery Time' }, { n: '66%', l: 'Orgs Hit' }],
+    meters: [{ l: 'Encryption Strength', v: 95 }, { l: 'Detection Difficulty', v: 88 }, { l: 'Financial Impact', v: 97 }]
+  },
+  {
+    name: 'Phishing', icon: '🎣', sev: 'HIGH', sevN: 2, sevC: 'sev-h',
+    desc: 'Social engineering attack using fraudulent emails, texts, or websites to trick victims into revealing credentials or installing malware. Spear phishing targets specific individuals using gathered personal data.',
+    stats: [{ n: '3.4B', l: 'Daily Emails' }, { n: '36%', l: 'Breach Cause' }, { n: '$17.7K', l: 'Cost/Minute' }],
+    meters: [{ l: 'Attack Volume', v: 98 }, { l: 'Success Rate', v: 72 }, { l: 'Detection Rate', v: 45 }]
+  },
+  {
+    name: 'SQL Injection', icon: '💉', sev: 'CRITICAL', sevN: 3, sevC: 'sev-c',
+    desc: 'Attackers inject malicious SQL code into input fields to manipulate database queries, enabling unauthorised data access, modification, or complete deletion of databases containing sensitive information.',
+    stats: [{ n: '#3', l: 'OWASP Rank' }, { n: '65%', l: 'Web Apps Vulnerable' }, { n: '$3.86M', l: 'Avg Breach Cost' }],
+    meters: [{ l: 'Web App Exposure', v: 65 }, { l: 'Data Risk', v: 92 }, { l: 'Patch Urgency', v: 89 }]
+  },
+  {
+    name: 'DDoS Attack', icon: '🌊', sev: 'HIGH', sevN: 2, sevC: 'sev-h',
+    desc: 'Distributed Denial of Service floods target servers with traffic from thousands of compromised machines (botnet), causing complete service unavailability for all legitimate users and customers.',
+    stats: [{ n: '29K/Day', l: 'Attacks Globally' }, { n: '$22K/Min', l: 'Downtime Cost' }, { n: '800Gbps', l: 'Peak Flood Size' }],
+    meters: [{ l: 'Volumetric Threat', v: 96 }, { l: 'Infrastructure Risk', v: 84 }, { l: 'Mitigation Cost', v: 78 }]
+  },
+  {
+    name: 'Zero-Day Exploit', icon: '💀', sev: 'CRITICAL', sevN: 3, sevC: 'sev-c',
+    desc: 'Attacks exploiting previously unknown software vulnerabilities before developers can issue patches. Nation-state actors and elite criminal groups primarily develop and deploy zero-day exploits against high-value targets.',
+    stats: [{ n: '$2.5M', l: 'Dark Web Price' }, { n: '0 Days', l: 'Patch Window' }, { n: '15 Days', l: 'Avg Dwell Time' }],
+    meters: [{ l: 'Severity Level', v: 100 }, { l: 'Rarity', v: 85 }, { l: 'Patch Urgency', v: 100 }]
+  },
+  {
+    name: 'Insider Threat', icon: '🕵️', sev: 'MEDIUM', sevN: 1, sevC: 'sev-m',
+    desc: 'Malicious or negligent employees, contractors, or partners who misuse authorised access to harm the organisation. Often the hardest threat to detect due to legitimate credentials and internal trust levels.',
+    stats: [{ n: '60%', l: 'Incidents Internal' }, { n: '$11.45M', l: 'Annual Cost' }, { n: '197 Days', l: 'Detection Time' }],
+    meters: [{ l: 'Detection Difficulty', v: 91 }, { l: 'Trust Abuse', v: 86 }, { l: 'Financial Impact', v: 79 }]
+  },
+];
+
+// CO1: Quick Sort applied — sorts threats by sevN (3=Critical, 2=High, 1=Medium)
+// Result: Critical threats appear first (descending order by severity number)
+// Time Complexity: O(n log n) average for n=6 threats
+const THREATS = quickSort(RAW_THREATS, 'sevN');
+
+// CO1: Sorted array of threat names enables Binary Search O(log n)
+// vs Linear Search O(n) — Binary Search is more efficient on sorted data
+const THREAT_NAMES_SORTED = [...THREATS].map(t => t.name).sort();
+
+function renderThreats(filter = '') {
+  const grid = document.getElementById('threats-grid');
+  grid.innerHTML = '';
+  let list = THREATS;
+  if (filter) {
+    // CO1: Binary Search — O(log n) exact match check on sorted names array
+    const idx = binarySearch(THREAT_NAMES_SORTED, filter);
+    const infoEl = document.getElementById('search-info');
+    if (idx >= 0) {
+      infoEl.textContent = `✓ Found "${filter}" — showing matching results`;
+    } else {
+      infoEl.textContent = `Showing results containing "${filter}"`;
+    }
+    // Linear Search fallback for partial matches — O(n)
+    list = THREATS.filter(t =>
+      t.name.toLowerCase().includes(filter.toLowerCase()) ||
+      t.desc.toLowerCase().includes(filter.toLowerCase())
+    );
+  }
+  list.forEach(t => {
+    const card = document.createElement('div');
+    card.className = 'tcard';
+    card.innerHTML = `
+      <div class="tcard-head" onclick="toggleCard(this)">
+        <span class="tcard-icon">${t.icon}</span>
+        <div class="tcard-info">
+          <div class="tcard-name">${t.name}</div>
+          <div class="tcard-sub">Severity: ${t.sev} · Click to expand analysis</div>
+        </div>
+        <span class="tcard-sev ${t.sevC}">${t.sev}</span>
+        <span class="tcard-arrow">▶</span>
+      </div>
+      <div class="tcard-body">
+        <p>${t.desc}</p>
+        <div class="tcard-stats">${t.stats.map(s => `<div class="tc-stat"><div class="tc-stat-n">${s.n}</div><div class="tc-stat-l">${s.l}</div></div>`).join('')}</div>
+        ${t.meters.map(m => `<div class="meter-wrap"><div class="meter-label"><span>${m.l}</span><span>${m.v}%</span></div><div class="meter-bar"><div class="meter-fill" data-w="${m.v}"></div></div></div>`).join('')}
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function toggleCard(head) {
+  const card = head.parentElement;
+  card.classList.toggle('open');
+  if (card.classList.contains('open')) {
+    setTimeout(() => { card.querySelectorAll('.meter-fill').forEach(b => { b.style.width = b.dataset.w + '%'; }); }, 100);
+  }
+}
+
+function searchThreats() {
+  const q = document.getElementById('threat-search').value.trim();
+  renderThreats(q);
+}
+
+// ── AWARENESS MODULE DATA ──
+const AWARENESS_MODULES = [
+  {
+    title: 'Password Security', icon: '🔑',
+    body: 'Strong passwords are your first line of defence. A compromised password is the most common entry point for attackers. Using a password manager and enabling multi-factor authentication dramatically reduces your risk.',
+    dos: ['Use 16+ character passphrases', 'Enable multi-factor authentication', 'Use a reputable password manager', 'Change passwords after any breach'],
+    donts: ['Reuse passwords across sites', 'Share passwords via email or chat', 'Use personal info in passwords', 'Write passwords on sticky notes']
+  },
+  {
+    title: 'Phishing Recognition', icon: '🎣',
+    body: 'Learn to identify fraudulent communications designed to steal your credentials or install malware. Phishing is responsible for over 36% of all data breaches globally. Vigilance is your strongest defence.',
+    dos: ['Verify sender email domains carefully', 'Hover over links before clicking', 'Report suspicious emails to IT', 'Call senders directly to verify urgent requests'],
+    donts: ['Click links in unsolicited emails', 'Download unexpected attachments', 'Enter credentials on unfamiliar sites', 'Ignore browser security warnings']
+  },
+  {
+    title: 'Network Security', icon: '🌐',
+    body: 'Securing your network perimeter and monitoring traffic prevents unauthorised access and data exfiltration. Every device on your network is a potential entry point that must be actively secured.',
+    dos: ['Use VPN on public WiFi networks', 'Enable firewall on all devices', 'Monitor network logs regularly', 'Segment networks by trust level'],
+    donts: ['Use public WiFi for sensitive work', 'Disable firewall for convenience', 'Ignore unusual network traffic patterns', 'Allow unrestricted outbound connections']
+  },
+  {
+    title: 'Device & Endpoint Security', icon: '💻',
+    body: 'Every device accessing your network is a potential attack surface. Endpoint hygiene and regular patching significantly reduces your vulnerability to known exploits and malware campaigns.',
+    dos: ['Keep OS and software updated immediately', 'Enable full-disk encryption', 'Lock screens after brief inactivity', 'Install reputable endpoint protection'],
+    donts: ['Delay critical security patch installation', 'Use admin accounts for daily tasks', 'Plug in unknown or untrusted USB drives', 'Install software from unverified sources']
+  },
+  {
+    title: 'Data Protection & Privacy', icon: '🛡',
+    body: 'Protecting sensitive data at rest and in transit is both a legal requirement and an ethical obligation. Data breaches cause long-lasting reputational and financial damage to organisations and individuals.',
+    dos: ['Encrypt sensitive data at rest and in transit', 'Apply least-privilege access controls', 'Backup data using 3-2-1 strategy', 'Classify data by sensitivity level'],
+    donts: ['Store sensitive data in plain text', 'Share confidential data via unsecured channels', 'Grant excessive permissions unnecessarily', 'Neglect testing backup restoration regularly']
+  },
+  {
+    title: 'Incident Response', icon: '🚨',
+    body: 'When breaches occur, a rehearsed incident response plan minimises damage, reduces recovery time, and limits legal liability. The first 24 hours of a breach are the most critical for containment.',
+    dos: ['Have a written IR plan and test it quarterly', 'Isolate affected systems immediately', 'Preserve evidence before remediation begins', 'Notify stakeholders and regulators promptly'],
+    donts: ['Panic and shut down all systems blindly', 'Attempt remediation before containing spread', 'Delete logs assuming they are corrupted', 'Pay ransoms without consulting security experts']
+  },
+];
+
+// ============================================================
+// CO3: Stack instance — tracks completed awareness modules (LIFO)
+// When a module is opened, its title is pushed onto the Stack
+// Stack displays most recently opened module first (LIFO order)
+// CO3: Array-based Stack — push O(1), toArray O(n)
+//
+// CO3: Queue instance — tracks pending awareness modules (FIFO)
+// All modules start in the Queue; they dequeue when opened
+// Queue displays modules in original assignment order (FIFO)
+// CO3: Array-based Queue — enqueue O(1), dequeue O(n) [shift]
+// ============================================================
+const completedStack = new Stack(); // CO3: Stack ADT — completed modules
+const pendingQueue = new Queue();   // CO3: Queue ADT — pending modules
+
+// CO3: Enqueue all module titles into the pending Queue at startup
+AWARENESS_MODULES.forEach(m => pendingQueue.enqueue(m.title));
+
+function renderAwareness() {
+  const grid = document.getElementById('awareness-grid');
+  grid.innerHTML = '';
+  AWARENESS_MODULES.forEach((m, i) => {
+    const card = document.createElement('div');
+    card.className = 'acard';
+    card.innerHTML = `
+      <div class="acard-head" onclick="toggleAcard(this,${i})">
+        <span class="acard-num">${String(i + 1).padStart(2, '0')}</span>
+        <span class="acard-title">${m.icon} ${m.title}</span>
+        <span class="acard-arrow">▶</span>
+      </div>
+      <div class="acard-body">
+        <p>${m.body}</p>
+        <div class="do-dont">
+          <div class="do-box"><div class="do-title">✅ DO</div><ul>${m.dos.map(d => `<li>${d}</li>`).join('')}</ul></div>
+          <div class="dont-box"><div class="dont-title">❌ DON'T</div><ul>${m.donts.map(d => `<li>${d}</li>`).join('')}</ul></div>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+  updateTrackers();
+}
+
+function toggleAcard(head, idx) {
+  const card = head.parentElement;
+  const wasOpen = card.classList.contains('open');
+  card.classList.toggle('open');
+  if (!wasOpen) {
+    const title = AWARENESS_MODULES[idx].title;
+    if (!completedStack.toArray().includes(title)) {
+      // CO3: Stack push — O(1) — marks module as completed
+      completedStack.push(title);
+      // CO3: Remove from Queue pending list when module is opened
+      const qi = pendingQueue.items.indexOf(title);
+      if (qi >= 0) pendingQueue.items.splice(qi, 1);
+      updateTrackers();
+    }
+  }
+}
+
+function updateTrackers() {
+  const sv = document.getElementById('stack-viz');
+  const qv = document.getElementById('queue-viz');
+  if (!sv || !qv) return;
+  // CO3: Stack toArray — O(n) — shows completed modules (most recent first)
+  const sa = completedStack.toArray();
+  // CO3: Queue toArray — O(n) — shows pending modules (FIFO order)
+  const qa = pendingQueue.toArray();
+  sv.innerHTML = sa.length
+    ? sa.map(t => `<span class="tracker-block">${t}</span>`).join('')
+    : `<span class="tracker-empty">Open a module to begin</span>`;
+  qv.innerHTML = qa.length
+    ? qa.map(t => `<span class="tracker-block">${t}</span>`).join('')
+    : `<span class="tracker-empty" style="color:var(--green)">All modules completed! 🎉</span>`;
+}
+
+// ============================================================
+// CO1: Quiz Questions Array
+// CO1: Shuffled using Fisher-Yates algorithm O(n) before each quiz
+// CO4: scoreMap is a HashTable — stores per-section scores O(1) lookup
+// ============================================================
+const QUESTIONS = [
+  { q: 'Which type of attack encrypts your files and demands payment to restore access?', sec: 'Ransomware & Malware', opts: ['Phishing', 'Ransomware', 'SQL Injection', 'DDoS'], ans: 1, exp: 'Ransomware is a type of malware that encrypts victim files and demands cryptocurrency payment for the decryption key. Recovery without paying is only possible if backups exist.' },
+  { q: 'What does MFA (Multi-Factor Authentication) protect against?', sec: 'Authentication', opts: ['Slow internet', 'Credential theft attacks', 'Hardware failure', 'Browser crashes'], ans: 1, exp: 'MFA requires a second verification factor beyond your password — such as an SMS code or authenticator app. Even if your password is stolen, attackers cannot access your account without the second factor.' },
+  { q: 'A zero-day exploit targets:', sec: 'Vulnerabilities', opts: ['Outdated software only', 'A vulnerability with no patch available yet', 'Unencrypted data', 'Weak passwords'], ans: 1, exp: 'A zero-day exploit attacks a software vulnerability that the developer is unaware of — so there is zero days of patch availability. They are extremely dangerous because no defence exists until discovered and patched.' },
+  { q: 'Phishing emails most commonly try to:', sec: 'Social Engineering', opts: ['Slow down your computer', 'Steal credentials or install malware', 'Upgrade your software', 'Improve network speed'], ans: 1, exp: 'Phishing attacks use deceptive emails or websites to trick victims into entering credentials or downloading malware. Always verify sender domains and hover over links before clicking.' },
+  { q: 'What is the 3-2-1 backup rule?', sec: 'Data Protection', opts: ['3 cloud services, 2 passwords, 1 antivirus', '3 copies of data, on 2 types of media, 1 stored offsite', '3 firewalls, 2 VPNs, 1 antivirus', '3 users, 2 admins, 1 guest'], ans: 1, exp: 'The 3-2-1 backup strategy means: 3 total copies of your data, stored on 2 different media types, with 1 copy kept offsite or offline. This protects against ransomware, hardware failure, and disasters simultaneously.' },
+  { q: 'SQL Injection attacks target:', sec: 'Web Security', opts: ['Email servers', 'Database-connected web applications', 'Wireless networks', 'Physical servers'], ans: 1, exp: 'SQL Injection exploits web applications that construct database queries using user-supplied input without proper sanitisation. Attackers insert malicious SQL code to read, modify, or delete database contents.' },
+  { q: 'What is a DDoS attack?', sec: 'Network Attacks', opts: ['Stealing data quietly', 'Encrypting files for ransom', 'Flooding a server with traffic to cause downtime', 'Installing a keylogger'], ans: 2, exp: 'Distributed Denial of Service (DDoS) attacks overwhelm a target server with massive amounts of traffic from a botnet (thousands of compromised machines), making the service unavailable to legitimate users.' },
+  { q: 'An insider threat is most accurately described as:', sec: 'Insider Threats', opts: ['A hacker from another country', 'A trusted individual misusing authorised access', 'A computer virus', 'A phishing email'], ans: 1, exp: 'Insider threats involve current or former employees, contractors, or partners who misuse their legitimate system access — either maliciously or through negligence. They are especially hard to detect because they have authorised credentials.' },
+  { q: 'Which of the following is the strongest password?', sec: 'Password Security', opts: ['password123', 'John1990!', 'Tr0ub4dor&3_Correct_Horse', 'qwerty'], ans: 2, exp: 'A long passphrase combining random words with numbers and symbols is the strongest. Length is the most important factor in password strength — each additional character exponentially increases crack time.' },
+  { q: 'What should you do FIRST when you suspect a security breach?', sec: 'Incident Response', opts: ['Delete all logs', 'Pay the ransom immediately', 'Isolate the affected systems', 'Restart all computers'], ans: 2, exp: 'Containment is the first priority — isolating affected systems prevents the attacker from spreading laterally across the network. Deleting logs destroys forensic evidence needed for investigation and legal proceedings.' },
+  { q: 'What does "least privilege" mean in cybersecurity?', sec: 'Access Control', opts: ['Giving all users admin access', 'Restricting users to only the permissions they need', 'Using the weakest passwords', 'Disabling all firewalls'], ans: 1, exp: 'Least privilege is the principle of granting users and systems only the minimum permissions required to perform their role. This limits the blast radius of a breach — a compromised low-privilege account cannot access sensitive systems.' },
+  { q: 'End-to-end encryption ensures:', sec: 'Encryption', opts: ['Data is fast to transmit', 'Only the sender and recipient can read the message', 'Messages are stored on cloud servers', 'All network traffic is blocked'], ans: 1, exp: 'End-to-end encryption encrypts data on the sender\'s device and decrypts it only on the recipient\'s device. Even the service provider cannot read the content. Examples: WhatsApp, Signal, and ProtonMail.' },
+  { q: 'What is a VPN primarily used for in cybersecurity?', sec: 'Network Security', opts: ['Speeding up your internet connection', 'Encrypting internet traffic and masking your IP address', 'Blocking all pop-up ads', 'Increasing download speed'], ans: 1, exp: 'A VPN (Virtual Private Network) encrypts all internet traffic between your device and the VPN server, preventing eavesdropping on public networks. It also masks your real IP address from websites and services you visit.' },
+  { q: 'Which of the following is an example of social engineering?', sec: 'Social Engineering', opts: ['Installing antivirus software', 'An attacker impersonating IT support to steal credentials', 'Running a security audit', 'Updating your firewall rules'], ans: 1, exp: 'Social engineering manipulates people psychologically rather than exploiting technical vulnerabilities. Impersonating IT support to get a user\'s password is a classic vishing (voice phishing) social engineering attack.' },
+  { q: 'What does HTTPS indicate about a website?', sec: 'Web Security', opts: ['The website is government-approved', 'Traffic between your browser and the site is encrypted', 'The site cannot contain malware', 'The site is registered and safe to use'], ans: 1, exp: 'HTTPS uses TLS/SSL to encrypt data between your browser and the web server, preventing eavesdroppers from reading transmitted data. However, HTTPS only confirms encryption — it does NOT guarantee the site is safe or legitimate.' },
+  { q: 'A firewall primarily works by:', sec: 'Network Security', opts: ['Encrypting all data on your hard drive', 'Filtering incoming and outgoing network traffic based on rules', 'Scanning emails for malware', 'Backing up your important files'], ans: 1, exp: 'A firewall monitors and controls network traffic based on predefined security rules. It acts as a barrier between trusted internal networks and untrusted external networks, blocking unauthorised connections while permitting legitimate traffic.' },
+  { q: 'What is the main danger of connecting to public WiFi without a VPN?', sec: 'Network Security', opts: ['Slower download speeds', 'Attackers can intercept your unencrypted network traffic', 'Your device battery drains faster', 'Websites load differently'], ans: 1, exp: 'On public WiFi, attackers on the same network can perform man-in-the-middle attacks, intercepting unencrypted traffic to steal credentials, session cookies, and sensitive data. A VPN encrypts all traffic, defeating this attack.' },
+  { q: 'Which action reduces your risk of ransomware attacks the most?', sec: 'Ransomware & Malware', opts: ['Using a colourful desktop wallpaper', 'Maintaining regular offline backups', 'Installing more RAM', 'Using a wired connection'], ans: 1, exp: 'Offline backups are the most effective ransomware mitigation. If your files are encrypted by ransomware, you can restore from a clean backup without paying the ransom. Offline storage prevents the ransomware from encrypting the backup too.' },
+  { q: 'What is spear phishing?', sec: 'Social Engineering', opts: ['A generic phishing email sent to millions of people', 'A targeted phishing attack using personal information about the victim', 'A type of DDoS attack', 'A network scanning technique'], ans: 1, exp: 'Spear phishing is a highly targeted form of phishing where attackers research specific individuals and craft personalised messages. They may reference your name, employer, colleagues, or recent activities to appear legitimate and credible.' },
+  { q: 'When should you install security patches?', sec: 'Vulnerabilities', opts: ['Only when your device starts crashing', 'Never — patches can break software', 'As soon as possible, especially for critical vulnerabilities', 'Only after waiting 6 months to check stability'], ans: 2, exp: 'Critical security patches should be applied immediately. Attackers actively scan for unpatched systems within hours of a vulnerability being published. Delaying patches leaves a known, exploitable hole open in your defences.' },
+  { q: 'What is credential stuffing?', sec: 'Authentication', opts: ['Creating very long passwords', 'Using stolen username/password pairs from data breaches to access other sites', 'Encrypting stored passwords', 'Verifying email addresses at registration'], ans: 1, exp: 'Credential stuffing automates login attempts using large lists of username/password pairs stolen from previous breaches. Since many people reuse passwords across sites, attackers succeed frequently. This is why unique passwords per site are essential.' },
+  { q: 'What does the principle of "defence in depth" mean?', sec: 'Security Strategy', opts: ['Having one very strong security layer', 'Using multiple overlapping security layers so failure of one doesn\'t mean total compromise', 'Using the most expensive security tools', 'Defending only the most critical systems'], ans: 1, exp: 'Defence in depth uses multiple security layers — perimeter firewall, endpoint protection, encryption, access controls, monitoring — so that even if one layer is bypassed, others prevent or limit the breach. No single control is relied upon alone.' },
+  { q: 'Which of the following is a sign of a phishing email?', sec: 'Social Engineering', opts: ['The email uses your full name correctly', 'The sender domain is slightly misspelled (e.g. microsofft.com)', 'The email arrived during business hours', 'The email has a company logo'], ans: 1, exp: 'Attackers use lookalike domains (microsofft.com, paypa1.com) to deceive recipients. Always examine the full sender email address carefully. Logos and names are easy to copy — the domain is what matters and is harder to fake exactly.' },
+  { q: 'What is the primary purpose of penetration testing?', sec: 'Security Assessment', opts: ['To make your system run faster', 'To proactively find and fix security weaknesses before attackers do', 'To install new software updates', 'To train new employees on IT systems'], ans: 1, exp: 'Penetration testing (pen testing) involves authorised security professionals simulating real attacks on your systems to discover vulnerabilities before malicious actors do. Findings are reported and remediated, significantly improving security posture.' },
+  { q: 'What does encrypting data "at rest" mean?', sec: 'Encryption', opts: ['Encrypting data while it travels over a network', 'Encrypting data stored on disk or other storage media', 'Temporarily pausing all data transfers', 'Deleting sensitive data when not in use'], ans: 1, exp: 'Encryption at rest protects data stored on hard drives, SSDs, databases, and cloud storage. If a device is physically stolen or storage is accessed without authorisation, the encrypted data is unreadable without the correct decryption key.' },
+];
+
+// ============================================================
+// CO4: scoreMap — HashTable instance for quiz section scores
+// Key: section name (string) | Value: {correct, total} object
+// Provides O(1) average lookup when updating per-topic scores
+// CO4: Efficient alternative to nested if-else or linear search
+// ============================================================
+let scoreMap, quizQ, qIdx, qScore, qCorrect, qWrong, bestStreak, curStreak, bonusPts, quizTimer, sectionScores;
+
+function startQuiz() {
+  // CO1: Fisher-Yates shuffle — O(n) — randomises question order each attempt
+  quizQ = shuffle(QUESTIONS);
+
+  // CO4: New HashTable instance for this quiz attempt's section scores
+  scoreMap = new HashTable(8);
+  sectionScores = {};
+  QUESTIONS.forEach(q => { if (!sectionScores[q.sec]) sectionScores[q.sec] = { correct: 0, total: 0 }; });
+  // CO4: Initialise all sections in Hash Table — O(n) with O(1) each set
+  quizQ.forEach(q => { scoreMap.set(q.sec, { correct: 0, total: 0 }); });
+
+  qIdx = 0; qScore = 0; qCorrect = 0; qWrong = 0; bestStreak = 0; curStreak = 0; bonusPts = 0;
+  document.getElementById('quiz-lobby').style.display = 'none';
+  document.getElementById('quiz-game').classList.add('on');
+  document.getElementById('q-result').classList.remove('on');
+  renderQ();
+}
+
+function renderQ() {
+  clearInterval(quizTimer);
+  const q = quizQ[qIdx];
+  document.getElementById('q-num').textContent = `Q ${qIdx + 1} / ${quizQ.length}`;
+  document.getElementById('q-score').textContent = `Score: ${qScore}`;
+  document.getElementById('q-prog').style.width = ((qIdx / quizQ.length) * 100) + '%';
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('q-exp').className = 'q-exp';
+  document.getElementById('btn-next').className = 'btn-next';
+  document.getElementById('q-streak').textContent = curStreak >= 2 ? `🔥 Streak ×${curStreak}! Keep going!` : '';
+  const opts = document.getElementById('q-opts');
+  opts.innerHTML = '';
+  q.opts.forEach((o, i) => {
+    const b = document.createElement('button');
+    b.className = 'q-opt'; b.textContent = o;
+    b.onclick = () => pickAnswer(i);
+    opts.appendChild(b);
+  });
+  let t = 20;
+  document.getElementById('q-timer').textContent = t;
+  document.getElementById('q-timer').className = 'q-timer';
+  quizTimer = setInterval(() => {
+    t--;
+    document.getElementById('q-timer').textContent = t;
+    if (t <= 5) document.getElementById('q-timer').className = 'q-timer warn';
+    if (t <= 0) { clearInterval(quizTimer); timeUp(); }
+  }, 1000);
+}
+
+function pickAnswer(i) {
+  clearInterval(quizTimer);
+  const q = quizQ[qIdx];
+  const opts = document.querySelectorAll('.q-opt');
+  opts.forEach(o => o.setAttribute('disabled', 'true'));
+  opts[q.ans].classList.add('correct');
+  // CO4: Hash Table get — O(1) average — retrieve current section score
+  const stored = scoreMap.get(q.sec) || { correct: 0, total: 0 };
+  stored.total++;
+  if (i === q.ans) {
+    opts[i].classList.add('correct');
+    qCorrect++; qScore += 10; curStreak++;
+    if (curStreak > bestStreak) bestStreak = curStreak;
+    if (curStreak % 3 === 0) { qScore += 5; bonusPts += 5; } // Streak bonus
+    stored.correct++;
+  } else {
+    opts[i].classList.add('wrong');
+    qWrong++; curStreak = 0;
+  }
+  // CO4: Hash Table set — O(1) average — update section score
+  scoreMap.set(q.sec, stored);
+  const exp = document.getElementById('q-exp');
+  exp.textContent = q.exp; exp.className = 'q-exp show';
+  document.getElementById('btn-next').className = 'btn-next show';
+  document.getElementById('q-score').textContent = `Score: ${qScore}`;
+}
+
+function timeUp() {
+  const q = quizQ[qIdx];
+  const opts = document.querySelectorAll('.q-opt');
+  opts.forEach(o => o.setAttribute('disabled', 'true'));
+  opts[q.ans].classList.add('correct');
+  qWrong++; curStreak = 0;
+  const exp = document.getElementById('q-exp');
+  exp.textContent = '⏱ Time up! ' + q.exp; exp.className = 'q-exp show';
+  document.getElementById('btn-next').className = 'btn-next show';
+}
+
+function nextQ() {
+  qIdx++;
+  if (qIdx >= quizQ.length) { showResults(); return; }
+  renderQ();
+}
+
+function showResults() {
+  clearInterval(quizTimer);
+  document.getElementById('quiz-game').classList.remove('on');
+  document.getElementById('q-result').classList.add('on');
+  document.getElementById('res-score-n').textContent = qScore;
+  document.getElementById('rb-correct').textContent = qCorrect;
+  document.getElementById('rb-wrong').textContent = qWrong;
+  document.getElementById('rb-streak').textContent = bestStreak;
+  document.getElementById('rb-bonus').textContent = bonusPts;
+
+  // CO4: Iterate through quizQ to aggregate scores per section
+  // CO4: Hash Table get — O(1) per section — retrieve stored section data
+  const seen = new Set();
+  let bk = '<b>Score by Topic:</b><br><br>';
+  quizQ.forEach(q => {
+    if (!seen.has(q.sec)) {
+      seen.add(q.sec);
+      // CO4: Hash Table get — O(1) average — fetch section score
+      const d = scoreMap.get(q.sec) || { correct: 0, total: 0 };
+      const pct = d.total ? Math.round(d.correct / d.total * 100) : 0;
+      const bar = '█'.repeat(Math.round(pct / 10)) + '░'.repeat(10 - Math.round(pct / 10));
+      bk += `<b>${q.sec}</b>: ${d.correct}/${d.total} (${pct}%) ${bar}<br>`;
+    }
+  });
+  document.getElementById('res-section-breakdown').innerHTML = bk;
+
+  // CO1: Linear search through grades array — O(n) for n=5 grade thresholds
+  const grades = [
+    { min: 0,   g: 'D — Keep Studying 📚' },
+    { min: 100, g: 'C — Basic Awareness 🛡' },
+    { min: 150, g: 'B — Competent Defender ⚔' },
+    { min: 200, g: 'A — Advanced Practitioner 🔐' },
+    { min: 240, g: 'S — Expert Defender 🏆' }
+  ];
+  let grade = grades[0].g;
+  for (let i = grades.length - 1; i >= 0; i--) {
+    if (qScore >= grades[i].min) { grade = grades[i].g; break; }
+  }
+  document.getElementById('res-grade').innerHTML = `<span style="color:var(--cyan)">Grade: ${grade}</span>`;
+}
+
+function restartQuiz() {
+  document.getElementById('q-result').classList.remove('on');
+  document.getElementById('quiz-lobby').style.display = 'block';
+}
+
+// ── BOOT — Session persistence ──
+window.addEventListener('load', () => {
+  const saved = sessionStorage.getItem('cs_user');
+  if (saved) {
+    const u = JSON.parse(saved);
+    currentUser = u;
+    document.getElementById('sb-username').textContent = u.name;
+    document.getElementById('pg-login').classList.add('hidden');
+    document.getElementById('app-shell').classList.add('open');
+    document.getElementById('ticker-wrap').style.display = 'block';
+    goPage('home');
+    startClock(); startFeed(); animateCounters(); renderThreats(); renderAwareness();
+  }
+});
+</script>
+</body>
+</html>
